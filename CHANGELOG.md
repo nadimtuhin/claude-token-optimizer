@@ -65,6 +65,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2025-11-11
+
+### Added
+
+- 🚀 **Bash initialization script** (`init.sh`)
+  - Automated project setup in 2 minutes
+  - Creates complete directory structure
+  - Generates all essential files
+  - Prompts for project information
+  - Sets up .claudeignore automatically
+  - Creates placeholder documentation
+  - Zero-token system configured automatically
+
+### Changed
+
+- 📚 Updated README with two setup methods:
+  - **Method 1**: Bash script (fastest, 2 minutes)
+  - **Method 2**: Claude prompt (most customizable, 5 minutes)
+- 📊 Added comparison table for setup methods
+- ✨ Improved Quick Start section with curl command
+
+### Features
+
+- One-command setup: `curl -fsSL https://... | bash`
+- Interactive prompts for project info
+- Colored output for better UX
+- Safety checks before setup
+- Complete structure generation
+
+---
+
 ## [Unreleased]
 
 ### Planned

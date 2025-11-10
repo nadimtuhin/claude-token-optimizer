@@ -64,15 +64,42 @@ Smart documentation architecture:
 
 ## ⚡ Quick Start
 
-### 1️⃣ Copy the Setup Prompt
+### Method 1: Bash Script (Fastest) 🚀
+
+Perfect for quick setup with basic structure:
+
+```bash
+# 1. Download and run the init script
+curl -fsSL https://raw.githubusercontent.com/nadimtuhin/claude-token-optimizer/main/init.sh | bash
+
+# Or clone and run locally
+git clone https://github.com/nadimtuhin/claude-token-optimizer.git
+cd your-project
+../claude-token-optimizer/init.sh
+```
+
+The script will:
+- ✅ Create complete directory structure
+- ✅ Generate all essential files
+- ✅ Set up .claudeignore
+- ✅ Create placeholder documentation
+- ✅ Configure zero-token system
+
+**Time**: 2 minutes | **Effort**: Run one command
+
+### Method 2: Claude Code Prompt (Most Customizable) 🎨
+
+Best for framework-specific patterns and full customization:
+
+**1️⃣ Copy the Setup Prompt**
 
 Open [`UNIVERSAL_SETUP.md`](UNIVERSAL_SETUP.md) and copy the entire file.
 
-### 2️⃣ Paste in Claude Code
+**2️⃣ Paste in Claude Code**
 
 Open Claude Code in your project and paste the prompt.
 
-### 3️⃣ Provide Context
+**3️⃣ Provide Context**
 
 ```
 Project Type: [Express / Next.js / React / Django / etc.]
@@ -80,11 +107,18 @@ Tech Stack: [List main technologies]
 Main Features: [Brief description]
 ```
 
-### 4️⃣ Done!
+**4️⃣ Done!**
 
-Claude automatically creates your optimized documentation structure.
+Claude automatically creates your optimized documentation structure with framework-specific patterns.
 
 **Time**: ~5 minutes | **Savings**: 90% tokens | **Effort**: Copy-paste
+
+### Which Method to Choose?
+
+| Method | Speed | Customization | Best For |
+|--------|-------|---------------|----------|
+| **Bash Script** | ⚡⚡⚡ 2 min | Basic structure | Quick setup, any project |
+| **Claude Prompt** | ⚡⚡ 5 min | Full framework patterns | Express, Next.js, custom needs |
 
 ---
 
