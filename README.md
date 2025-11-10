@@ -320,8 +320,8 @@ MIT License - see `LICENSE` file
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/nadimtuhin/claude-docs-optimizer/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/nadimtuhin/claude-docs-optimizer/discussions)
+- **Issues**: [GitHub Issues](https://github.com/nadimtuhin/claude-token-optimizer/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/nadimtuhin/claude-token-optimizer/discussions)
 
 ---
 
