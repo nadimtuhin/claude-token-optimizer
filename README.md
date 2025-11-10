@@ -154,6 +154,17 @@ Everything. Edit files, change structure, adjust what loads. It's just markdown 
 **How do I maintain it?**
 When you hit a critical bug that took >1 hour, add it to `COMMON_MISTAKES.md`. That's the main upkeep. Rest is optional.
 
+## Related Projects
+
+**[Claude Workflows](https://github.com/nadimtuhin/claude-workflows)** - Systematic workflow commands for Claude Code
+
+While this repo optimizes **what Claude knows** (documentation), Claude Workflows optimizes **what Claude does** (processes). They work great together:
+
+- This repo: Documentation structure (4 core files, 0-token historical context)
+- Workflows: Process automation (`/dev:start-feature`, `/git:commit`, `/test:run`)
+
+Both use the same principle: 0 tokens until you need them.
+
 ## Contributing
 
 Want to add a framework? Copy one of the [examples](examples/), test it on a real project, and submit a PR with token savings.
