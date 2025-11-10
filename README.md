@@ -1,48 +1,129 @@
-# Claude Code Setup
+# Claude Token Optimizer
 
-**Reusable setup prompts for optimizing Claude Code documentation**
+<div align="center">
 
-Achieve **90% token savings** on any project in 5 minutes.
+**🚀 Reduce Claude Code token usage by 90% in 5 minutes**
 
----
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/nadimtuhin/claude-token-optimizer?style=social)](https://github.com/nadimtuhin/claude-token-optimizer/stargazers)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/nadimtuhin/claude-token-optimizer/releases)
 
-## Overview
+[Quick Start](#-quick-start) • [Features](#-key-features) • [Examples](#-usage-examples) • [Contributing](#-contributing)
 
-This repository provides ready-to-use setup prompts that optimize Claude Code's documentation structure for any project. The system reduces token usage from ~8,000 to ~800 tokens at session start while preserving all knowledge.
-
-### Benefits
-
-- ✅ **90% token savings** on session start
-- ✅ **Zero-token historical context** with completion docs
-- ✅ **Selective loading** - load only what you need
-- ✅ **Framework-specific** - tailored to your stack
-- ✅ **5 minute setup** - automated by Claude Code
+</div>
 
 ---
 
-## Quick Start
+## 📊 Token Savings
 
-### Universal Setup (Any Project)
+<table>
+<tr>
+<td width="50%">
 
-1. Copy the entire `UNIVERSAL_SETUP.md` file
-2. Open Claude Code in your project
-3. Paste the prompt
-4. Provide project context when asked
-5. Claude creates everything automatically
+### Before Optimization 😰
+- **Session start**: 8,000 tokens
+- **Historical context**: 3,000 tokens
+- **Task completion**: Load everything
+- **Total**: ~11,000 tokens
 
-### Framework-Specific Setup
+</td>
+<td width="50%">
 
-For framework-specific patterns (Express.js, Next.js):
+### After Optimization 🎉
+- **Session start**: 800 tokens (↓ 90%)
+- **Historical context**: 0 tokens (↓ 100%)
+- **Task completion**: Load as needed
+- **Total**: ~1,300 tokens (↓ 88%)
 
-1. Start with Universal Setup (above)
-2. Then say: "Also apply the [Express/Next.js] patterns from the example"
-3. Claude customizes for your framework
+</td>
+</tr>
+</table>
+
+**Result**: Save **~9,700 tokens per session** = More context for actual work!
 
 ---
 
-## What Gets Created
+## 🎯 What Is This?
 
-After setup, your project will have:
+Claude Token Optimizer provides **copy-paste setup prompts** that restructure your project's documentation for maximum token efficiency. It works with **any framework** and takes **5 minutes** to set up.
+
+### The Problem
+
+Claude Code auto-loads all documentation at session start, consuming thousands of tokens before you even begin working. Historical context (old sessions, completed tasks) takes even more tokens despite rarely being needed.
+
+### The Solution
+
+Smart documentation architecture:
+- ✅ **Selective loading** - Load only 4 essential files at start
+- ✅ **Zero-token history** - Task completion docs never auto-load
+- ✅ **Topic-based learning** - Load specific topics as needed
+- ✅ **Framework-optimized** - Patterns for Express, Next.js, and more
+
+---
+
+## ⚡ Quick Start
+
+### 1️⃣ Copy the Setup Prompt
+
+Open [`UNIVERSAL_SETUP.md`](UNIVERSAL_SETUP.md) and copy the entire file.
+
+### 2️⃣ Paste in Claude Code
+
+Open Claude Code in your project and paste the prompt.
+
+### 3️⃣ Provide Context
+
+```
+Project Type: [Express / Next.js / React / Django / etc.]
+Tech Stack: [List main technologies]
+Main Features: [Brief description]
+```
+
+### 4️⃣ Done!
+
+Claude automatically creates your optimized documentation structure.
+
+**Time**: ~5 minutes | **Savings**: 90% tokens | **Effort**: Copy-paste
+
+---
+
+## 🎁 Key Features
+
+<table>
+<tr>
+<td width="33%">
+
+### 📉 Token Savings
+- **90%** reduction at session start
+- **88%** overall reduction
+- **100%** savings on history
+
+</td>
+<td width="33%">
+
+### 🔧 Framework Support
+- Universal (any framework)
+- Express.js patterns
+- Next.js patterns
+- More coming!
+
+</td>
+<td width="33%">
+
+### ⚡ Easy Setup
+- 5-minute setup
+- Copy-paste prompts
+- Automated by Claude
+- No manual work
+
+</td>
+</tr>
+</table>
+
+---
+
+## 📁 What Gets Created
 
 ```
 your-project/
@@ -50,286 +131,339 @@ your-project/
 ├── .claudeignore                       # Prevents auto-loading
 │
 ├── .claude/
-│   ├── COMMON_MISTAKES.md              # Critical errors (~350 tokens)
+│   ├── COMMON_MISTAKES.md              # Critical errors (~350 tokens) ⚠️
 │   ├── QUICK_START.md                  # Commands (~100 tokens)
 │   ├── ARCHITECTURE_MAP.md             # File locations (~150 tokens)
 │   ├── LEARNINGS_INDEX.md              # Navigation (~200 tokens)
 │   ├── DOCUMENTATION_MAINTENANCE.md    # Maintenance guide (~400 tokens)
 │   │
-│   ├── completions/                    # Task docs (0 tokens - never auto-load)
-│   ├── sessions/                       # Session files (0 tokens)
-│   └── templates/                      # Reusable templates
+│   ├── completions/                    # Task docs (0 tokens - never auto-load) 🎯
+│   │   └── README.md
+│   │
+│   ├── sessions/                       # Session history (0 tokens) 📝
+│   │   ├── active/
+│   │   ├── archive/
+│   │   └── README.md
+│   │
+│   └── templates/
+│       ├── completion-template.md
+│       └── session-template.md
 │
 └── docs/
     ├── INDEX.md                        # Master navigation
     ├── QUICK_REFERENCE.md              # Fast lookups
-    ├── learnings/                      # Topic files (load as needed)
-    └── archive/                        # Historical (0 tokens)
+    │
+    ├── learnings/                      # Topic files (load as needed) 📚
+    │   ├── [topic-1].md                (~200-700 tokens each)
+    │   ├── [topic-2].md
+    │   └── [topic-3].md
+    │
+    └── archive/                        # Historical docs (0 tokens) 📦
+        └── README.md
 ```
 
----
-
-## Token Savings
-
-### Before Optimization:
-- Session start: ~8,000 tokens (all docs auto-loaded)
-- Historical context: ~3,000 tokens (sessions, summaries)
-- **Total**: ~11,000 tokens
-
-### After Optimization:
-- Session start: ~800 tokens (4 essential files)
-- Task-specific: +500-1,500 tokens (1-2 topic files as needed)
-- Historical context: 0 tokens (never auto-loaded)
-- **Total**: ~1,300 tokens
-
-### Savings: 88% reduction (11,000 → 1,300 tokens)
+**Session Start**: Only 4 files auto-load (~800 tokens)
+**Task-Specific**: Load 1-2 topic files as needed (~500-1500 tokens)
+**Historical**: Never auto-loaded (0 tokens, infinite storage)
 
 ---
 
-## Available Setups
+## 🚀 Usage Examples
 
-### 1. Universal Setup
-**File**: `UNIVERSAL_SETUP.md`
-
-Works for any project type:
-- Express, Next.js, React, Vue, Angular
-- Python (Django, Flask, FastAPI)
-- Ruby (Rails), PHP (Laravel)
-- Any language/framework
-
-**What it creates**:
-- Core documentation structure
-- Token-optimized file organization
-- Completion docs system
-- Session file management
-- .claudeignore configuration
-
-### 2. Framework Examples
-
-#### Express.js
-**File**: `examples/express.md`
-
-**Includes**:
-- Express routing patterns
-- Middleware organization
-- API design patterns
-- Database patterns
-- Error handling
-
-#### Next.js
-**File**: `examples/nextjs.md`
-
-**Includes**:
-- App Router vs Pages Router
-- Server/Client component patterns
-- Data fetching strategies
-- API routes
-- Routing patterns
-
----
-
-## How It Works
-
-### Session Start Protocol
-
-**Load 4 essential files** (~800 tokens):
-1. `CLAUDE.md` - Project overview
-2. `.claude/COMMON_MISTAKES.md` - Critical errors to avoid
-3. `.claude/QUICK_START.md` - Essential commands
-4. `.claude/ARCHITECTURE_MAP.md` - File locations
-
-**Then load task-specific docs** as needed:
-- Browser automation? → Load `docs/learnings/browser-automation.md`
-- Queue work? → Load `docs/learnings/queue-system.md`
-- Writing tests? → Load `docs/learnings/testing-patterns.md`
-
-### Zero-Token Historical Context
-
-Files in these directories cost **0 tokens**:
-- `.claude/completions/` - Task completion docs
-- `.claude/sessions/` - Session files
-- `docs/archive/` - Historical documentation
-
-They're never auto-loaded but available when explicitly requested.
-
----
-
-## Documentation Structure
-
-### Essential Files (Always Load - ~800 tokens)
-- `CLAUDE.md` - Main project guide
-- `.claude/COMMON_MISTAKES.md` - Critical mistakes
-- `.claude/QUICK_START.md` - Commands
-- `.claude/ARCHITECTURE_MAP.md` - File structure
-
-### Topic Files (Load As Needed - ~200-700 tokens each)
-Split by concern for selective loading:
-- `docs/learnings/api-design.md`
-- `docs/learnings/testing-patterns.md`
-- `docs/learnings/performance.md`
-- (Framework-specific topics)
-
-### Historical Files (Never Auto-Load - 0 tokens)
-- `.claude/completions/` - Completed task documentation
-- `.claude/sessions/` - Session history
-- `docs/archive/` - Superseded documentation
-
----
-
-## Usage Examples
-
-### Example 1: Express API Project
+### Express.js API
 
 ```bash
-# 1. Copy UNIVERSAL_SETUP.md
-# 2. Paste in Claude Code
-# 3. Provide context:
-#    - Project: Express REST API
-#    - Stack: Express, PostgreSQL, Prisma, Jest
-#    - Features: User auth, payments, webhooks
+# 1. Copy UNIVERSAL_SETUP.md → Paste in Claude Code
+# 2. Provide context:
+#    Project: Express REST API
+#    Stack: Express, PostgreSQL, Prisma, Jest
+#    Features: Auth, payments, webhooks
 
-# Result: Complete structure created in 5 minutes
+# ✅ Result in 5 minutes:
 # - docs/learnings/api-design.md
 # - docs/learnings/middleware-patterns.md
 # - docs/learnings/database-patterns.md
-# - Common mistakes: Missing error handler, improper middleware order
+# - docs/learnings/error-handling.md
+# - Common mistakes: Missing error handler, middleware order
 ```
 
-### Example 2: Next.js App
+**Token savings**: 87% (10,000 → 1,300 tokens)
+
+### Next.js App
 
 ```bash
-# 1. Copy UNIVERSAL_SETUP.md
-# 2. Paste in Claude Code
-# 3. Provide context:
-#    - Project: Next.js E-commerce
-#    - Stack: Next.js 14 (App Router), Tailwind, Prisma
-#    - Features: Product catalog, checkout, admin
+# 1. Copy UNIVERSAL_SETUP.md → Paste in Claude Code
+# 2. Provide context:
+#    Project: Next.js E-commerce
+#    Stack: Next.js 14 (App Router), Tailwind, Prisma
+#    Features: Product catalog, checkout, admin
 
-# Result: Next.js-optimized structure
+# ✅ Result in 5 minutes:
 # - docs/learnings/routing-patterns.md
 # - docs/learnings/component-patterns.md
 # - docs/learnings/data-fetching.md
-# - Common mistakes: Using client components unnecessarily
+# - docs/learnings/api-routes.md
+# - Common mistakes: Client components, image optimization
+```
+
+**Token savings**: 84% (9,000 → 1,400 tokens)
+
+### Any Framework
+
+Works with Vue, Angular, Django, Flask, Rails, Laravel, Go, Rust, and more!
+
+---
+
+## 📚 Documentation
+
+### Core Files
+
+- **[UNIVERSAL_SETUP.md](UNIVERSAL_SETUP.md)** - Works for any project
+- **[QUICK_START.md](QUICK_START.md)** - 5-minute setup guide
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute
+
+### Examples
+
+- **[Express.js Example](examples/express.md)** - API patterns, middleware, database
+- **[Next.js Example](examples/nextjs.md)** - Routing, components, data fetching
+- **[Examples Guide](examples/README.md)** - Overview of all examples
+
+### Templates
+
+- **[Completion Template](templates/completion-template.md)** - Task documentation
+- **[Maintenance Guide](templates/maintenance-guide.md)** - When to update docs
+- **[Templates Guide](templates/README.md)** - Template overview
+
+---
+
+## 💡 How It Works
+
+### Session Start Protocol
+
+Claude loads **only 4 essential files** (~800 tokens):
+
+1. 📖 `CLAUDE.md` - Project overview
+2. ⚠️ `.claude/COMMON_MISTAKES.md` - Critical errors to avoid
+3. ⚡ `.claude/QUICK_START.md` - Essential commands
+4. 🗺️ `.claude/ARCHITECTURE_MAP.md` - File locations
+
+### Task-Specific Loading
+
+Claude loads additional docs **only when needed**:
+
+| Task | Load | Tokens |
+|------|------|--------|
+| API work | `docs/learnings/api-design.md` | ~500 |
+| Testing | `docs/learnings/testing-patterns.md` | ~300 |
+| Debugging | `docs/learnings/common-pitfalls.md` | ~700 |
+| Performance | `docs/learnings/performance.md` | ~150 |
+
+**Total**: ~1,300 tokens vs ~8,000+ before
+
+### Zero-Token Historical Context
+
+These directories **cost 0 tokens** (never auto-loaded):
+
+- 🎯 `.claude/completions/` - Task completion docs
+- 📝 `.claude/sessions/` - Session history
+- 📦 `docs/archive/` - Historical documentation
+
+Available when explicitly requested, but otherwise free!
+
+---
+
+## ✨ Framework Examples
+
+### Available Now
+
+| Framework | Status | Savings | File |
+|-----------|--------|---------|------|
+| **Express.js** | ✅ Ready | 87% | [express.md](examples/express.md) |
+| **Next.js** | ✅ Ready | 84% | [nextjs.md](examples/nextjs.md) |
+
+### Coming Soon (PRs Welcome!)
+
+- 🔜 Vue.js
+- 🔜 Angular
+- 🔜 NestJS
+- 🔜 Django / Flask
+- 🔜 Ruby on Rails
+- 🔜 Laravel
+- 🔜 Spring Boot
+
+**Want to add a framework?** See [CONTRIBUTING.md](CONTRIBUTING.md)
+
+---
+
+## 🎨 Customization
+
+### Adding New Topics
+
+```bash
+# 1. Create topic file
+docs/learnings/your-topic.md
+
+# 2. Update navigation
+docs/INDEX.md  # Add navigation entry + token estimate
+
+# 3. Add cross-references
+# Link from related topic files
+```
+
+### Framework-Specific Patterns
+
+```bash
+# 1. Update common mistakes
+.claude/COMMON_MISTAKES.md  # Add framework pitfalls
+
+# 2. Customize architecture
+.claude/ARCHITECTURE_MAP.md  # Your file structure
+
+# 3. Create learnings
+docs/learnings/  # Framework-specific patterns
+
+# 4. Update commands
+docs/QUICK_REFERENCE.md  # Framework CLI commands
 ```
 
 ---
 
-## Customization
+## 📈 Success Stories
 
-### Adding New Topics
+### RedwoodJS Project (Original)
 
-1. Create file in `docs/learnings/your-topic.md`
-2. Update `docs/INDEX.md` with navigation entry and token estimate
-3. Add cross-references in related topics
-
-### Adapting for Your Framework
-
-1. Update `COMMON_MISTAKES.md` with framework pitfalls
-2. Customize `ARCHITECTURE_MAP.md` with your structure
-3. Create framework-specific learnings
-4. Update `QUICK_REFERENCE.md` with framework commands
-
----
-
-## Documentation Maintenance
-
-The system includes guidance for Claude on when to update docs:
-
-### Update COMMON_MISTAKES.md when:
-- ✅ Bug took >1 hour to debug
-- ✅ Error could cause production issue
-- ✅ Mistake repeated across sessions
-- ✅ Pattern violates framework conventions
-
-### Create completion doc when:
-- ✅ Every task completion
-
-### Archive docs when:
-- ✅ Planning docs after feature implemented
-- ✅ POC summaries after feature stabilizes
-- ✅ Superseded status docs
-
-See `templates/maintenance-guide.md` for complete guide.
-
----
-
-## Success Stories
-
-### RedwoodJS Project (Source)
-- **Before**: 8,000 tokens at session start
-- **After**: 800 tokens at session start
-- **Savings**: 90%
-- **Files split**: DETAILED_LEARNINGS (1,783 lines) → 6 topic files
+<table>
+<tr>
+<td><b>Before</b></td>
+<td>8,000 tokens at session start</td>
+</tr>
+<tr>
+<td><b>After</b></td>
+<td>800 tokens at session start</td>
+</tr>
+<tr>
+<td><b>Savings</b></td>
+<td>90% (7,200 tokens saved)</td>
+</tr>
+<tr>
+<td><b>Method</b></td>
+<td>Split DETAILED_LEARNINGS (1,783 lines) → 6 topic files</td>
+</tr>
+</table>
 
 ### Express API (Estimated)
-- **Before**: ~10,000 tokens (all docs + examples)
-- **After**: ~1,300 tokens (essentials + api-design)
-- **Savings**: 87%
+
+**Before**: 10,000 tokens → **After**: 1,300 tokens → **Savings**: 87%
 
 ### Next.js App (Estimated)
-- **Before**: ~9,000 tokens (all React + Next docs)
-- **After**: ~1,400 tokens (essentials + component-patterns)
-- **Savings**: 84%
+
+**Before**: 9,000 tokens → **After**: 1,400 tokens → **Savings**: 84%
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-Contributions welcome! Please see `CONTRIBUTING.md`.
+Contributions are welcome! We especially need:
 
-### Adding Framework Examples
+- 🌟 **Framework examples** (Vue, Angular, Django, etc.)
+- 📚 **Documentation improvements**
+- 🐛 **Bug reports** and fixes
+- 💡 **Feature suggestions**
 
-To add a new framework example:
+**How to contribute:**
 
-1. Copy `examples/express.md` or `examples/nextjs.md`
-2. Replace with framework-specific:
-   - Directory structure
-   - Common mistakes
-   - Code patterns
-   - Testing approaches
-   - CLI commands
-3. Test in a real project
-4. Submit PR with token savings data
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/vue-example`)
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ---
 
-## FAQ
+## ❓ FAQ
 
-### Q: Will this work with my framework?
+<details>
+<summary><b>Q: Will this work with my framework?</b></summary>
+
 **A**: Yes! The universal setup works with any framework. Framework examples (Express, Next.js) provide additional patterns but are optional.
+</details>
 
-### Q: What if I already have documentation?
-**A**: The setup prompts will analyze existing docs and either integrate or suggest consolidation.
+<details>
+<summary><b>Q: What if I already have documentation?</b></summary>
 
-### Q: Can I customize the structure?
+**A**: The setup prompts will analyze existing docs and either integrate or suggest consolidation. No work is lost.
+</details>
+
+<details>
+<summary><b>Q: Can I customize the structure?</b></summary>
+
 **A**: Absolutely! The prompts create a starting point. Customize topic files, token estimates, and organization to your needs.
+</details>
 
-### Q: How do I maintain this long-term?
+<details>
+<summary><b>Q: How do I maintain this long-term?</b></summary>
+
 **A**: The system includes `DOCUMENTATION_MAINTENANCE.md` with guidance on when to update docs, archive files, and save common mistakes.
+</details>
 
-### Q: Does this work for non-JavaScript projects?
-**A**: Yes! Universal setup works for Python, Ruby, Go, Rust, PHP, etc. Framework examples are currently JavaScript-focused but more coming soon.
+<details>
+<summary><b>Q: Does this work for non-JavaScript projects?</b></summary>
 
----
+**A**: Yes! Universal setup works for Python, Ruby, Go, Rust, PHP, Java, etc. Framework examples are currently JavaScript-focused but more coming soon.
+</details>
 
-## License
+<details>
+<summary><b>Q: What about existing Claude Code projects?</b></summary>
 
-MIT License - see `LICENSE` file
-
----
-
-## Support
-
-- **Issues**: [GitHub Issues](https://github.com/nadimtuhin/claude-token-optimizer/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/nadimtuhin/claude-token-optimizer/discussions)
+**A**: You can apply this to existing projects. Claude will help migrate your current docs to the optimized structure.
+</details>
 
 ---
 
-## Acknowledgments
+## 📄 License
 
-Developed while optimizing documentation for a RedwoodJS project. The system reduced token usage by 90% and made it reusable for any project.
+[MIT License](LICENSE) - feel free to use in personal and commercial projects.
 
 ---
 
-**Last Updated**: 2025-11-11
-**Version**: 1.0.0
+## 🙏 Acknowledgments
+
+Developed while optimizing documentation for a RedwoodJS project. The system reduced token usage by 90% and has been generalized for any project.
+
+**Special thanks to:**
+- The Claude Code team at Anthropic
+- The open source community
+- Early adopters and contributors
+
+---
+
+## 📞 Support
+
+- 🐛 **Bug reports**: [GitHub Issues](https://github.com/nadimtuhin/claude-token-optimizer/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/nadimtuhin/claude-token-optimizer/discussions)
+- ⭐ **Star the repo** to show support!
+
+---
+
+## 🚀 Get Started
+
+Ready to save 90% on tokens?
+
+1. **[Copy UNIVERSAL_SETUP.md](UNIVERSAL_SETUP.md)**
+2. **Paste in Claude Code**
+3. **Provide project context**
+4. **Done in 5 minutes!**
+
+[Get Started →](UNIVERSAL_SETUP.md)
+
+---
+
+<div align="center">
+
+**Made with ❤️ for the Claude Code community**
+
+[![Star on GitHub](https://img.shields.io/github/stars/nadimtuhin/claude-token-optimizer?style=social)](https://github.com/nadimtuhin/claude-token-optimizer/stargazers)
+
+</div>
