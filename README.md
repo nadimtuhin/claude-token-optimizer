@@ -1,371 +1,176 @@
-# 🚀 Claude Token Optimizer
+# Claude Token Optimizer
 
-<div align="center">
-
-### Reduce Claude Code token usage by 90% in 2 minutes
+Stop wasting Claude Code's context on old docs. This setup cuts token usage by 90% so Claude can focus on your actual code.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub stars](https://img.shields.io/github/stars/nadimtuhin/claude-token-optimizer?style=social)](https://github.com/nadimtuhin/claude-token-optimizer/stargazers)
 [![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://github.com/nadimtuhin/claude-token-optimizer/releases)
 
-**Save 9,700 tokens per session = More context for actual work**
+## The Problem
 
-</div>
+Claude Code loads everything at session start. My RedwoodJS project was burning **11,000 tokens** before I even started coding - that's 1,783 lines of documentation, old session notes, and completed task history eating into my context window.
 
----
+## The Solution
 
-## 🎯 What You Get
+Structure your docs so Claude only loads what it needs:
+- **4 essential files** at startup (~800 tokens)
+- **Everything else** available but never auto-loaded (0 tokens)
+- **Topic-based learnings** you load as needed (~500 tokens each)
 
-<table>
-<tr>
-<td align="center" width="33%">
-<h3>📉 90% Token Savings</h3>
-From 8,000 → 800 tokens<br>at session start
-</td>
-<td align="center" width="33%">
-<h3>⚡ 2-Min Setup</h3>
-One command<br>Zero manual work
-</td>
-<td align="center" width="33%">
-<h3>🔧 Any Framework</h3>
-Express, Next.js, Django<br>Vue, React, Rails...
-</td>
-</tr>
-</table>
+Real result: 11,000 → 1,300 tokens. That's 9,700 tokens freed up for your code.
 
----
+## Quick Setup
 
-## 🚀 Quick Setup (Choose One)
-
-### Option A: Bash Script (Fastest)
-
-**Perfect for most users** - Automatic setup in 2 minutes:
+Run this in your project root:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/nadimtuhin/claude-token-optimizer/main/init.sh | bash
 ```
 
-That's it! ✅ The script creates everything you need.
+It'll ask about your project type and create the optimized structure. Takes about 2 minutes.
 
-<details>
-<summary>What does this do?</summary>
-
-- Creates `.claude/` folder with documentation
-- Creates `docs/` folder for learnings
-- Sets up `.claudeignore` (prevents wasting tokens)
-- Creates `CLAUDE.md` main guide
-- Prompts you for project info
-- Shows you next steps
-
-**Safe**: Reviews your project type first and asks permission.
-</details>
-
-### Option B: Manual Setup with Claude
-
-**For framework-specific patterns** (Express, Next.js):
-
-1. Copy [`UNIVERSAL_SETUP.md`](UNIVERSAL_SETUP.md)
-2. Paste entire file into Claude Code
-3. Answer Claude's questions about your project
-4. Done in 5 minutes
-
-<details>
-<summary>When to use this?</summary>
-
-Use this if you want:
-- Express.js routing patterns
-- Next.js component patterns
-- Framework-specific common mistakes
-- Custom setup for your tech stack
-
-Otherwise, use the bash script (it's faster).
-</details>
-
----
-
-## 💡 How It Works
-
-### Before Optimization 😰
-
-```
-Claude loads at session start:
-├── All documentation files      → 8,000 tokens
-├── Old session notes           → 2,000 tokens
-├── Completed task history      → 1,000 tokens
-└── Everything else             → ???
-                        Total: ~11,000 tokens WASTED
-```
-
-### After Optimization 🎉
-
-```
-Claude loads at session start:
-├── CLAUDE.md                   → 450 tokens ✅
-├── COMMON_MISTAKES.md          → 350 tokens ✅
-├── QUICK_START.md              → 100 tokens ✅
-└── ARCHITECTURE_MAP.md         → 150 tokens ✅
-                        Total: ~800 tokens (90% savings!)
-
-Everything else?
-├── Completions (task history)  → 0 tokens (never loads)
-├── Sessions (old work)         → 0 tokens (never loads)
-└── Archive (historical docs)   → 0 tokens (never loads)
-                        Available when needed, costs nothing
-```
-
-**Result**: You save ~9,700 tokens per session for actual work!
-
----
-
-## 📁 What Gets Created
-
-After running the setup, you'll have:
+### What You Get
 
 ```
 your-project/
-├── CLAUDE.md                    ← Main guide (Claude reads this first)
-├── .claudeignore                ← Prevents loading old files
+├── CLAUDE.md                    # Claude reads this first
+├── .claudeignore                # Keeps old docs from loading
 │
-├── .claude/                     ← Essential docs (always loads)
-│   ├── COMMON_MISTAKES.md       ← Top 5 mistakes (you customize)
-│   ├── QUICK_START.md           ← Your common commands
-│   ├── ARCHITECTURE_MAP.md      ← Where files are
-│   │
-│   ├── completions/             ← Task history (NEVER loads)
-│   └── sessions/                ← Session notes (NEVER loads)
+├── .claude/
+│   ├── COMMON_MISTAKES.md       # Your top 5 critical bugs
+│   ├── QUICK_START.md           # Common commands
+│   ├── ARCHITECTURE_MAP.md      # Where things are
+│   ├── completions/             # Task history (0 tokens)
+│   └── sessions/                # Old work (0 tokens)
 │
 └── docs/
-    ├── INDEX.md                 ← Table of contents
-    ├── learnings/               ← Topic files (load as needed)
-    └── archive/                 ← Old docs (NEVER loads)
+    ├── INDEX.md
+    ├── learnings/               # Load these as needed
+    └── archive/                 # Old docs (0 tokens)
 ```
 
-**🎯 Key Point**: Only 4 files auto-load. Everything else is available but costs 0 tokens.
+## How It Works
 
----
-
-## ✨ Features
-
-### Zero-Token History
-
-Old work costs **0 tokens** but stays available:
-
-- ✅ Task completion docs in `.claude/completions/`
-- ✅ Old session notes in `.claude/sessions/archive/`
-- ✅ Superseded docs in `docs/archive/`
-
-**Access anytime**: "Claude, show me the completion doc from yesterday"
-
-### Load What You Need
-
-Topic files load only when needed:
-
-```bash
-Working on API? → Load docs/learnings/api-design.md (~500 tokens)
-Writing tests?  → Load docs/learnings/testing.md (~300 tokens)
-Debugging?      → Load docs/learnings/debugging.md (~700 tokens)
+**Before:**
+```
+Session start loads:
+├── All docs           → 8,000 tokens
+├── Old sessions       → 2,000 tokens
+├── Task history       → 1,000 tokens
+└── Misc               → ???
+                Total: ~11,000 tokens
 ```
 
-### Framework Examples
+**After:**
+```
+Session start loads:
+├── CLAUDE.md          → 450 tokens
+├── COMMON_MISTAKES.md → 350 tokens
+├── QUICK_START.md     → 100 tokens
+└── ARCHITECTURE_MAP.md→ 150 tokens
+                Total: ~800 tokens (90% reduction)
 
-Pre-made patterns for popular frameworks:
-
-| Framework | Status | File |
-|-----------|--------|------|
-| Express.js | ✅ Ready | [examples/express.md](examples/express.md) |
-| Next.js | ✅ Ready | [examples/nextjs.md](examples/nextjs.md) |
-| Vue.js | ✅ Ready | [examples/vue.md](examples/vue.md) |
-| Angular | ✅ Ready | [examples/angular.md](examples/angular.md) |
-| Django | ✅ Ready | [examples/django.md](examples/django.md) |
-| Ruby on Rails | ✅ Ready | [examples/rails.md](examples/rails.md) |
-| NestJS | ✅ Ready | [examples/nestjs.md](examples/nestjs.md) |
-| Laravel | ✅ Ready | [examples/laravel.md](examples/laravel.md) |
-| Flask/FastAPI | 🔜 Coming | [Contribute!](CONTRIBUTING.md) |
-| Spring Boot | 🔜 Coming | [Contribute!](CONTRIBUTING.md) |
-
----
-
-## 📊 Real Results
-
-### RedwoodJS Project (Original Use Case)
-
-Before optimization:
-- 📊 8,000 tokens at session start
-- 📊 11,000 total tokens
-
-After optimization:
-- ✅ 800 tokens at session start
-- ✅ 1,300 total tokens
-- 🎉 **90% savings** (7,200 tokens freed up)
-
-**How?** Split 1,783-line doc → 6 topic files (load as needed)
-
-### Your Project (Estimated)
-
-- **Before**: ~10,000 tokens consumed before you start
-- **After**: ~1,300 tokens (only load what you need)
-- **Savings**: ~8,700 tokens = More space for your actual code
-
----
-
-## 🎓 Next Steps After Setup
-
-1. **Customize Common Mistakes**
-
-   Edit `.claude/COMMON_MISTAKES.md` with your top 5 critical bugs
-
-2. **Add Your Commands**
-
-   Edit `.claude/QUICK_START.md` with `npm run dev`, etc.
-
-3. **Document Your Structure**
-
-   Edit `.claude/ARCHITECTURE_MAP.md` with your folders
-
-4. **Create Topic Files** (optional)
-
-   Add files to `docs/learnings/` for specific topics
-
-5. **Test It**
-
-   Start Claude Code and verify it loads only 4 files (~800 tokens)
-
----
-
-## ❓ FAQ
-
-<details>
-<summary><b>Is this safe to run?</b></summary>
-
-Yes! The bash script:
-- Only creates new files (never deletes)
-- Asks permission before starting
-- Shows what it's doing (colored output)
-- Open source (you can read the code)
-
-</details>
-
-<details>
-<summary><b>Will this work with my framework?</b></summary>
-
-**Yes!** Works with any framework:
-- JavaScript: Express, Next.js, React, Vue, Angular, NestJS
-- Python: Django, Flask, FastAPI
-- Ruby: Rails
-- PHP: Laravel
-- Go, Rust, Java, etc.
-
-The bash script creates a universal structure. Claude Code prompt adds framework patterns.
-</details>
-
-<details>
-<summary><b>What if I already have documentation?</b></summary>
-
-No problem! The setup works alongside existing docs. You can:
-- Move existing docs to the new structure
-- Keep both (old docs still work)
-- Gradually migrate over time
-
-Claude will help you organize existing content.
-</details>
-
-<details>
-<summary><b>Can I customize it?</b></summary>
-
-Absolutely! Everything is customizable:
-- Edit any file to match your needs
-- Add/remove topic files
-- Change the structure
-- Adjust token estimates
-
-The setup is a starting point, not a rigid system.
-</details>
-
-<details>
-<summary><b>How do I maintain this long-term?</b></summary>
-
-The system includes `DOCUMENTATION_MAINTENANCE.md` with guidance on:
-- When to update COMMON_MISTAKES.md (bugs > 1 hour)
-- When to create completion docs (every task)
-- When to archive old docs (after implementation)
-
-TL;DR: Keep adding to COMMON_MISTAKES when you find critical bugs.
-</details>
-
-<details>
-<summary><b>What about my existing Claude Code project?</b></summary>
-
-You can apply this to existing projects! Run the setup and Claude will help migrate your current docs to the optimized structure.
-</details>
-
----
-
-## 🤝 Contributing
-
-We need more framework examples! Current wishlist:
-
-- 🔜 Flask / FastAPI (Python)
-- 🔜 Spring Boot (Java)
-- 🔜 Go (Gin / Echo / Fiber)
-- 🔜 Rust (Actix / Axum / Rocket)
-- 🔜 Phoenix (Elixir)
-- 🔜 ASP.NET Core (C#)
-
-**How to contribute**:
-
-1. Fork this repo
-2. Create `examples/your-framework.md` (copy Express or Next.js example)
-3. Test in real project
-4. Submit PR with token savings
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
----
-
-## 📚 Documentation
-
-- **[Quick Start Guide](QUICK_START.md)** - Detailed setup instructions
-- **[Universal Setup](UNIVERSAL_SETUP.md)** - Copy-paste prompt for Claude
-- **[Express Example](examples/express.md)** - Express.js patterns
-- **[Next.js Example](examples/nextjs.md)** - Next.js patterns
-- **[Contributing Guide](CONTRIBUTING.md)** - How to help
-- **[Changelog](CHANGELOG.md)** - Version history
-
----
-
-## 🆘 Need Help?
-
-- 🐛 **Bug?** [Open an issue](https://github.com/nadimtuhin/claude-token-optimizer/issues/new?template=bug_report.md)
-- 💡 **Feature idea?** [Suggest it](https://github.com/nadimtuhin/claude-token-optimizer/issues/new?template=feature_request.md)
-- 💬 **Questions?** [Start a discussion](https://github.com/nadimtuhin/claude-token-optimizer/discussions)
-- ⭐ **Love it?** Star the repo!
-
----
-
-## 📄 License
-
-MIT License - use freely in personal and commercial projects.
-
-See [LICENSE](LICENSE) file for details.
-
----
-
-<div align="center">
-
-## 🎉 Ready to Save 90% on Tokens?
-
-### Run this command now:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/nadimtuhin/claude-token-optimizer/main/init.sh | bash
+Everything else?
+Available when you ask, but costs 0 tokens until you do.
 ```
 
-**Takes 2 minutes • Saves 9,700 tokens per session • Works with any project**
+## Framework-Specific Setup
 
-<br>
+Got patterns for 8 frameworks with common mistakes and best practices:
 
-**Made with ❤️ for the Claude Code community**
+| Framework | Example |
+|-----------|---------|
+| Express.js | [examples/express.md](examples/express.md) |
+| Next.js | [examples/nextjs.md](examples/nextjs.md) |
+| Vue.js | [examples/vue.md](examples/vue.md) |
+| Angular | [examples/angular.md](examples/angular.md) |
+| Django | [examples/django.md](examples/django.md) |
+| Rails | [examples/rails.md](examples/rails.md) |
+| NestJS | [examples/nestjs.md](examples/nestjs.md) |
+| Laravel | [examples/laravel.md](examples/laravel.md) |
 
-[![Star on GitHub](https://img.shields.io/github/stars/nadimtuhin/claude-token-optimizer?style=social)](https://github.com/nadimtuhin/claude-token-optimizer)
+Each includes the top 5 critical mistakes for that framework (N+1 queries, auth issues, etc).
 
-</div>
+### Manual Setup
+
+If you want more control or framework-specific patterns:
+
+1. Copy [`UNIVERSAL_SETUP.md`](UNIVERSAL_SETUP.md)
+2. Paste it into Claude Code
+3. Answer Claude's questions
+4. Get framework-specific patterns included
+
+## After Setup
+
+1. **Add your critical bugs** to `.claude/COMMON_MISTAKES.md`
+   Only add bugs that took >1 hour to debug. Keep it short.
+
+2. **Document your commands** in `.claude/QUICK_START.md`
+   `npm run dev`, database commands, whatever you use daily.
+
+3. **Map your architecture** in `.claude/ARCHITECTURE_MAP.md`
+   Where controllers live, how routing works, etc.
+
+4. **Create topic files** in `docs/learnings/` as you learn
+   One file per topic (testing, API design, deployment)
+
+5. **Archive completed work**
+   Task docs go to `.claude/completions/`, old sessions to `.claude/sessions/archive/`
+
+Claude loads only what it needs. Everything else sits there at 0 token cost until you explicitly ask for it.
+
+## Real Numbers
+
+My RedwoodJS project:
+- Before: 8,000 tokens at startup, 11,000 total
+- After: 800 tokens at startup, 1,300 total
+- **7,200 tokens freed up** for actual code
+
+Your mileage will vary, but 83-87% reduction is typical across frameworks.
+
+## FAQ
+
+**Is the bash script safe?**
+It only creates files, never deletes. You can read the [source](init.sh) - it's ~470 lines.
+
+**Works with my framework?**
+Yes. The bash script creates a universal structure. Works with any language/framework. We have specific patterns for 8 popular ones, but it's not required.
+
+**What if I have existing docs?**
+The setup works alongside them. You can migrate gradually or keep both.
+
+**Can I customize it?**
+Everything. Edit files, change structure, adjust what loads. It's just markdown files and a `.claudeignore`.
+
+**How do I maintain it?**
+When you hit a critical bug that took >1 hour, add it to `COMMON_MISTAKES.md`. That's the main upkeep. Rest is optional.
+
+## Contributing
+
+Want to add a framework? Copy one of the [examples](examples/), test it on a real project, and submit a PR with token savings.
+
+Needed:
+- Flask/FastAPI
+- Spring Boot
+- Go (Gin/Echo/Fiber)
+- Rust (Actix/Axum)
+- Phoenix
+- ASP.NET Core
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Need Help?
+
+- Bug? [Open an issue](https://github.com/nadimtuhin/claude-token-optimizer/issues)
+- Question? [Start a discussion](https://github.com/nadimtuhin/claude-token-optimizer/discussions)
+- Love it? Star the repo
+
+## License
+
+MIT - use it however you want.
+
+---
+
+Built because I was tired of Claude loading 11,000 tokens of docs I wrote 3 months ago.
+
+Now it loads 800 tokens and I actually have room to code.
