@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub stars](https://img.shields.io/github/stars/nadimtuhin/claude-token-optimizer?style=social)](https://github.com/nadimtuhin/claude-token-optimizer/stargazers)
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/nadimtuhin/claude-token-optimizer/releases)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/nadimtuhin/claude-token-optimizer/releases)
 
 **Save 9,700 tokens per session = More context for actual work**
 
@@ -174,8 +174,12 @@ Pre-made patterns for popular frameworks:
 |-----------|--------|------|
 | Express.js | ✅ Ready | [examples/express.md](examples/express.md) |
 | Next.js | ✅ Ready | [examples/nextjs.md](examples/nextjs.md) |
-| Vue.js | 🔜 Coming | [Contribute!](CONTRIBUTING.md) |
-| Django | 🔜 Coming | [Contribute!](CONTRIBUTING.md) |
+| Vue.js | ✅ Ready | [examples/vue.md](examples/vue.md) |
+| Angular | ✅ Ready | [examples/angular.md](examples/angular.md) |
+| Django | ✅ Ready | [examples/django.md](examples/django.md) |
+| Ruby on Rails | ✅ Ready | [examples/rails.md](examples/rails.md) |
+| NestJS | 🔜 Coming | [Contribute!](CONTRIBUTING.md) |
+| Laravel | 🔜 Coming | [Contribute!](CONTRIBUTING.md) |
 
 ---
 
@@ -296,14 +300,14 @@ You can apply this to existing projects! Run the setup and Claude will help migr
 
 ## 🤝 Contributing
 
-We need framework examples! Current wishlist:
+We need more framework examples! Current wishlist:
 
-- 🔜 Vue.js
-- 🔜 Angular
-- 🔜 Django / Flask
-- 🔜 Ruby on Rails
-- 🔜 Laravel
 - 🔜 NestJS
+- 🔜 Flask / FastAPI
+- 🔜 Laravel
+- 🔜 Spring Boot
+- 🔜 Go (Gin / Echo)
+- 🔜 Rust (Actix / Axum)
 
 **How to contribute**:
 

@@ -96,16 +96,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2025-11-11
+
+### Added
+
+- ✅ **Vue.js framework example** (`examples/vue.md`)
+  - Composition API patterns (Vue 3+)
+  - State management with Pinia
+  - Vue Router patterns
+  - Component communication best practices
+  - Vitest testing patterns
+  - Top 5 Vue-specific mistakes
+
+- ✅ **Angular framework example** (`examples/angular.md`)
+  - Standalone components (Angular 17+)
+  - Signals and reactive state
+  - Dependency injection patterns
+  - RxJS and observables
+  - NgRx state management
+  - Top 5 Angular-specific mistakes
+
+- ✅ **Django framework example** (`examples/django.md`)
+  - Django ORM and QuerySet optimization
+  - Class-based vs function-based views
+  - Django REST Framework patterns
+  - Forms and validation
+  - pytest and unittest patterns
+  - Top 5 Django-specific mistakes
+
+- ✅ **Ruby on Rails framework example** (`examples/rails.md`)
+  - ActiveRecord associations and queries
+  - RESTful controller patterns
+  - Hotwire (Turbo + Stimulus)
+  - Background jobs with Sidekiq
+  - RSpec testing patterns
+  - Top 5 Rails-specific mistakes
+
+### Changed
+
+- 📚 Updated `examples/README.md` with 4 new frameworks
+- 📚 Updated main `README.md` framework table
+- 📊 Added token savings estimates for all frameworks (83-87% reduction)
+
+### Metrics
+
+- **Total frameworks supported**: 6 (Express, Next.js, Vue, Angular, Django, Rails)
+- **Token savings**: 83-87% across all frameworks
+- **Coverage**: JavaScript, TypeScript, Python, Ruby ecosystems
+
+---
+
 ## [Unreleased]
 
 ### Planned
 
-- 🔜 Vue.js framework example
-- 🔜 Angular framework example
-- 🔜 Django/Flask framework examples
-- 🔜 Ruby on Rails framework example
-- 🔜 Laravel framework example
 - 🔜 NestJS framework example
+- 🔜 Flask/FastAPI framework examples
+- 🔜 Laravel framework example
+- 🔜 Spring Boot framework example
+- 🔜 Go (Gin/Echo) framework examples
+- 🔜 Rust (Actix/Axum) framework examples
 - 🔜 Community contributions and improvements
 
 ---

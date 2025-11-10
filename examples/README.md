@@ -37,6 +37,70 @@ Framework-specific setup examples with common patterns, mistakes, and best pract
 
 ---
 
+### [Vue.js](vue.md)
+
+**For**: Vue.js applications
+
+**Includes**:
+- Composition API patterns (Vue 3+)
+- Component communication (props/emits)
+- State management with Pinia
+- Vue Router patterns
+- Testing with Vitest
+- Common mistakes to avoid
+
+**Use when building**: SPAs, progressive web apps, modern Vue applications
+
+---
+
+### [Angular](angular.md)
+
+**For**: Angular applications
+
+**Includes**:
+- Standalone components (Angular 17+)
+- Signals and reactive state
+- Dependency injection patterns
+- RxJS and observables
+- Route guards and resolvers
+- Common mistakes to avoid
+
+**Use when building**: Enterprise applications, TypeScript-first projects
+
+---
+
+### [Django](django.md)
+
+**For**: Django (Python) applications
+
+**Includes**:
+- Django ORM and QuerySet optimization
+- Class-based vs function-based views
+- Django REST Framework patterns
+- Forms and validation
+- Testing with pytest
+- Common mistakes to avoid
+
+**Use when building**: Web applications, REST APIs, CMS systems
+
+---
+
+### [Ruby on Rails](rails.md)
+
+**For**: Rails applications
+
+**Includes**:
+- ActiveRecord associations and queries
+- RESTful controller patterns
+- Hotwire (Turbo + Stimulus)
+- Background jobs with Sidekiq
+- RSpec testing patterns
+- Common mistakes to avoid
+
+**Use when building**: Full-stack web applications, MVPs, CRUD apps
+
+---
+
 ## How to Use
 
 1. **Start with Universal Setup**
@@ -60,13 +124,11 @@ Framework-specific setup examples with common patterns, mistakes, and best pract
 Want to add a framework? See `CONTRIBUTING.md`
 
 **Needed examples:**
-- Vue.js
-- Angular
 - NestJS
-- Django / Flask / FastAPI
-- Ruby on Rails
+- Flask / FastAPI
 - Laravel
 - Spring Boot
+- Go (Gin / Echo)
 - And more!
 
 ---
@@ -77,7 +139,10 @@ Want to add a framework? See `CONTRIBUTING.md`
 |-----------|--------|-------|---------|
 | Express | ~10,000 | ~1,300 | 87% |
 | Next.js | ~9,000 | ~1,400 | 84% |
-| (Add yours!) | | | |
+| Vue.js | ~9,500 | ~1,500 | 84% |
+| Angular | ~10,500 | ~1,500 | 86% |
+| Django | ~11,000 | ~1,800 | 84% |
+| Rails | ~10,000 | ~1,700 | 83% |
 
 ---
 
