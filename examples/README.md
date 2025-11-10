@@ -101,6 +101,38 @@ Framework-specific setup examples with common patterns, mistakes, and best pract
 
 ---
 
+### [NestJS](nestjs.md)
+
+**For**: NestJS (Node.js) applications
+
+**Includes**:
+- Module organization and dependency injection
+- Controllers, guards, interceptors, pipes
+- TypeORM and Prisma patterns
+- Testing with Jest (unit, integration, e2e)
+- Exception handling and validation
+- Common mistakes to avoid
+
+**Use when building**: Enterprise Node.js APIs, microservices, TypeScript projects
+
+---
+
+### [Laravel](laravel.md)
+
+**For**: Laravel (PHP) applications
+
+**Includes**:
+- Eloquent ORM and query optimization
+- Resource controllers and routes
+- API resources and transformations
+- Form requests and validation
+- PHPUnit/Pest testing patterns
+- Common mistakes to avoid
+
+**Use when building**: PHP web applications, REST APIs, CMS systems
+
+---
+
 ## How to Use
 
 1. **Start with Universal Setup**
@@ -124,11 +156,10 @@ Framework-specific setup examples with common patterns, mistakes, and best pract
 Want to add a framework? See `CONTRIBUTING.md`
 
 **Needed examples:**
-- NestJS
 - Flask / FastAPI
-- Laravel
 - Spring Boot
 - Go (Gin / Echo)
+- Rust (Actix / Axum)
 - And more!
 
 ---
@@ -143,6 +174,8 @@ Want to add a framework? See `CONTRIBUTING.md`
 | Angular | ~10,500 | ~1,500 | 86% |
 | Django | ~11,000 | ~1,800 | 84% |
 | Rails | ~10,000 | ~1,700 | 83% |
+| NestJS | ~11,500 | ~1,900 | 83% |
+| Laravel | ~10,500 | ~1,800 | 83% |
 
 ---
 

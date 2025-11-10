@@ -146,16 +146,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2025-11-11
+
+### Added
+
+- ✅ **NestJS framework example** (`examples/nestjs.md`)
+  - Module organization and dependency injection
+  - Controllers, guards, interceptors, pipes
+  - TypeORM and Prisma database patterns
+  - Exception handling and validation (DTOs)
+  - Jest testing (unit, integration, e2e)
+  - Top 5 NestJS-specific mistakes
+
+- ✅ **Laravel framework example** (`examples/laravel.md`)
+  - Eloquent ORM and query optimization
+  - Resource controllers and RESTful routes
+  - API resources and transformations
+  - Form requests and validation
+  - PHPUnit/Pest testing patterns
+  - Top 5 Laravel-specific mistakes
+
+### Changed
+
+- 📚 Updated `examples/README.md` with 2 new frameworks
+- 📚 Updated main `README.md` framework table
+- 📊 Added token savings estimates (83% for both)
+
+### Metrics
+
+- **Total frameworks supported**: 8 (Express, Next.js, Vue, Angular, Django, Rails, NestJS, Laravel)
+- **Token savings**: 83-87% across all frameworks
+- **Coverage**: JavaScript, TypeScript, Python, Ruby, PHP ecosystems
+
+---
+
 ## [Unreleased]
 
 ### Planned
 
-- 🔜 NestJS framework example
 - 🔜 Flask/FastAPI framework examples
-- 🔜 Laravel framework example
 - 🔜 Spring Boot framework example
-- 🔜 Go (Gin/Echo) framework examples
-- 🔜 Rust (Actix/Axum) framework examples
+- 🔜 Go (Gin/Echo/Fiber) framework examples
+- 🔜 Rust (Actix/Axum/Rocket) framework examples
+- 🔜 Phoenix (Elixir) framework example
+- 🔜 ASP.NET Core (C#) framework example
 - 🔜 Community contributions and improvements
 
 ---
