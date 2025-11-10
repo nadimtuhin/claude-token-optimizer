@@ -1,10 +1,18 @@
-# Claude Token Optimizer
+<div align="center">
 
-Stop wasting Claude Code's context on old docs. This setup cuts token usage by 90% so Claude can focus on your actual code.
+# 🚀 Claude Token Optimizer
+
+**Stop wasting Claude Code's context on old docs**
+
+Cut token usage by 90% so Claude can focus on your actual code
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub stars](https://img.shields.io/github/stars/nadimtuhin/claude-token-optimizer?style=social)](https://github.com/nadimtuhin/claude-token-optimizer/stargazers)
 [![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://github.com/nadimtuhin/claude-token-optimizer/releases)
+
+</div>
+
+---
 
 ## The Problem
 
