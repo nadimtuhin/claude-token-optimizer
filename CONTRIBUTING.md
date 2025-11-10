@@ -10,7 +10,7 @@ Thank you for your interest in contributing! This project helps developers optim
 
 Found a bug or have a suggestion?
 
-1. Check [existing issues](https://github.com/nadimtuhin/claude-code-setup/issues)
+1. Check [existing issues](https://github.com/nadimtuhin/claude-docs-optimizer/issues)
 2. Create a new issue with:
    - Clear description
    - Steps to reproduce (if bug)
@@ -175,8 +175,8 @@ When adding a framework example, ensure it includes:
 
 ## Questions?
 
-- **Discussion**: [GitHub Discussions](https://github.com/nadimtuhin/claude-code-setup/discussions)
-- **Issues**: [GitHub Issues](https://github.com/nadimtuhin/claude-code-setup/issues)
+- **Discussion**: [GitHub Discussions](https://github.com/nadimtuhin/claude-docs-optimizer/discussions)
+- **Issues**: [GitHub Issues](https://github.com/nadimtuhin/claude-docs-optimizer/issues)
 
 ---
 

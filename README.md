@@ -320,8 +320,8 @@ MIT License - see `LICENSE` file
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/nadimtuhin/claude-code-setup/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/nadimtuhin/claude-code-setup/discussions)
+- **Issues**: [GitHub Issues](https://github.com/nadimtuhin/claude-docs-optimizer/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/nadimtuhin/claude-docs-optimizer/discussions)
 
 ---
 
