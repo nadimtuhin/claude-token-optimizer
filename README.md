@@ -8,7 +8,7 @@ Cut token usage by 90% so Claude can focus on your actual code
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub stars](https://img.shields.io/github/stars/nadimtuhin/claude-token-optimizer?style=social)](https://github.com/nadimtuhin/claude-token-optimizer/stargazers)
-[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://github.com/nadimtuhin/claude-token-optimizer/releases)
+[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](https://github.com/nadimtuhin/claude-token-optimizer/releases)
 
 </div>
 
@@ -84,13 +84,14 @@ Available when you ask, but costs 0 tokens until you do.
 
 ## Framework-Specific Setup
 
-Got patterns for 8 frameworks with common mistakes and best practices:
+Got patterns for 9 frameworks with common mistakes and best practices:
 
 | Framework | Example |
 |-----------|---------|
 | Express.js | [examples/express.md](examples/express.md) |
 | Next.js | [examples/nextjs.md](examples/nextjs.md) |
 | Vue.js | [examples/vue.md](examples/vue.md) |
+| Nuxt.js | [examples/nuxtjs.md](examples/nuxtjs.md) |
 | Angular | [examples/angular.md](examples/angular.md) |
 | Django | [examples/django.md](examples/django.md) |
 | Rails | [examples/rails.md](examples/rails.md) |

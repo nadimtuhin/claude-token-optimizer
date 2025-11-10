@@ -180,6 +180,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2025-11-11
+
+### Added
+
+- ✅ **Nuxt.js framework example** (`examples/nuxtjs.md`)
+  - Server-side rendering and data fetching (useFetch, useAsyncData)
+  - File-based routing and dynamic routes
+  - Auto-imports and composables
+  - Server routes and API endpoints
+  - useState and Pinia state management
+  - Top 5 Nuxt-specific mistakes (SSR pitfalls, hydration issues)
+
+### Changed
+
+- 📚 Updated `examples/README.md` with Nuxt.js
+- 📚 Updated main `README.md` framework count to 9
+- 📊 Added token savings estimate (84%)
+
+### Metrics
+
+- **Total frameworks supported**: 9 (Express, Next.js, Vue, Nuxt, Angular, Django, Rails, NestJS, Laravel)
+- **Token savings**: 83-87% across all frameworks
+- **Coverage**: JavaScript, TypeScript, Python, Ruby, PHP ecosystems
+
+---
+
 ## [Unreleased]
 
 ### Planned

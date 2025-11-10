@@ -53,6 +53,22 @@ Framework-specific setup examples with common patterns, mistakes, and best pract
 
 ---
 
+### [Nuxt.js](nuxtjs.md)
+
+**For**: Nuxt.js (Vue) applications
+
+**Includes**:
+- Server-side rendering and data fetching
+- File-based routing and layouts
+- Auto-imports and composables
+- Server routes and API endpoints
+- useState and Pinia patterns
+- Common mistakes to avoid
+
+**Use when building**: Full-stack Vue apps, SSR apps, static sites, universal applications
+
+---
+
 ### [Angular](angular.md)
 
 **For**: Angular applications
@@ -171,6 +187,7 @@ Want to add a framework? See `CONTRIBUTING.md`
 | Express | ~10,000 | ~1,300 | 87% |
 | Next.js | ~9,000 | ~1,400 | 84% |
 | Vue.js | ~9,500 | ~1,500 | 84% |
+| Nuxt.js | ~9,500 | ~1,500 | 84% |
 | Angular | ~10,500 | ~1,500 | 86% |
 | Django | ~11,000 | ~1,800 | 84% |
 | Rails | ~10,000 | ~1,700 | 83% |
