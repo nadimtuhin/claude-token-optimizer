@@ -2,8 +2,17 @@ import chalk from 'chalk';
 import path from 'node:path';
 import { scanAutoLoadFiles } from '../lib/scanner.js';
 import { countTokens } from '../lib/tokenizer.js';
+import { buildClaudeMd, buildCommonMistakesMd, buildQuickStartMd, buildArchitectureMapMd } from './init.js';
 
-const OPTIMIZED_BASELINE = 1050;
+function computeOptimizedAfter() {
+  const date = new Date().toISOString().split('T')[0];
+  return [
+    { label: 'CLAUDE.md', content: buildClaudeMd('Application', 'Your stack', 'See README', date) },
+    { label: '.claude/COMMON_MISTAKES.md', content: buildCommonMistakesMd(date) },
+    { label: '.claude/QUICK_START.md', content: buildQuickStartMd(date) },
+    { label: '.claude/ARCHITECTURE_MAP.md', content: buildArchitectureMapMd(date) },
+  ].map(f => ({ label: f.label, tokens: countTokens(f.content) }));
+}
 
 export async function buildReport(dir) {
   const files = await scanAutoLoadFiles(dir);
@@ -14,10 +23,11 @@ export async function buildReport(dir) {
   }));
 
   const before = fileBreakdown.reduce((sum, f) => sum + f.tokens, 0);
-  const after = OPTIMIZED_BASELINE;
+  const afterFiles = computeOptimizedAfter();
+  const after = afterFiles.reduce((sum, f) => sum + f.tokens, 0);
   const savings = before - after;
 
-  return { before, after, savings, files: fileBreakdown };
+  return { before, after, savings, files: fileBreakdown, afterFiles };
 }
 
 export async function measureCommand() {
@@ -45,14 +55,10 @@ export async function measureCommand() {
   console.log('');
   console.log(chalk.dim('  AFTER (post-init estimate)'));
   console.log(chalk.dim('  ' + '─'.repeat(45)));
-  const essentials = [
-    ['CLAUDE.md', 450],
-    ['.claude/COMMON_MISTAKES.md', 350],
-    ['.claude/QUICK_START.md', 100],
-    ['.claude/ARCHITECTURE_MAP.md', 150],
-  ];
-  for (const [label, tokens] of essentials) {
-    console.log(`  ${label.padEnd(35)} ${tokens.toLocaleString().padStart(8)} tokens`);
+  for (const f of report.afterFiles) {
+    const label = f.label.padEnd(35);
+    const tokens = f.tokens.toLocaleString().padStart(8);
+    console.log(`  ${label} ${tokens} tokens`);
   }
   console.log(chalk.dim('  ' + '─'.repeat(45)));
   console.log(`  ${'Total auto-loaded:'.padEnd(35)} ${chalk.green(report.after.toLocaleString().padStart(8))} tokens`);

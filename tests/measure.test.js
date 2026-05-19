@@ -28,9 +28,13 @@ describe('buildReport', () => {
     assert.equal(report.before, 0);
   });
 
-  it('after is the optimized baseline (~1050 tokens)', async () => {
+  it('after equals sum of afterFiles token counts', async () => {
     const report = await buildReport(tmpDir);
-    assert.ok(report.after >= 800 && report.after <= 1300, `expected ~1050, got ${report.after}`);
+    assert.ok(Array.isArray(report.afterFiles), 'afterFiles should be an array');
+    assert.equal(report.afterFiles.length, 4, 'should have 4 essential files');
+    const sum = report.afterFiles.reduce((s, f) => s + f.tokens, 0);
+    assert.equal(report.after, sum, 'after should equal sum of afterFiles tokens');
+    assert.ok(report.after > 0, 'after should be non-zero (real tokenization)');
   });
 
   it('savings is before minus after', async () => {

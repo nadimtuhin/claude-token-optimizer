@@ -15,6 +15,7 @@ export function run() {
     .description('Set up optimized documentation structure in your project')
     .option('--framework <name>', 'skip prompts, use known framework patterns (express, nextjs, django, rails, vue, nuxtjs, angular, nestjs, laravel, fastapi, go, spring-boot, svelte)')
     .option('--yes', 'non-interactive with defaults')
+    .option('--force', 'overwrite existing CLAUDE.md if present')
     .action(initCommand);
 
   program

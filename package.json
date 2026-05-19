@@ -7,9 +7,18 @@
   },
   "main": "src/cli.js",
   "type": "module",
+  "files": [
+    "bin/",
+    "src/",
+    "templates/",
+    "examples/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "node --test tests/**/*.test.js",
-    "test:watch": "node --test --watch tests/**/*.test.js"
+    "test:watch": "node --test --watch tests/**/*.test.js",
+    "prepublishOnly": "npm test"
   },
   "engines": {
     "node": ">=18"

@@ -13,7 +13,7 @@ function writeFile(filePath, content) {
   fs.writeFileSync(filePath, content, 'utf8');
 }
 
-function buildClaudeMd(projectType, techStack, mainFeatures, date) {
+export function buildClaudeMd(projectType, techStack, mainFeatures, date) {
   return `# CLAUDE.md
 
 **Quick-start guide for Claude Code - Complete details in linked docs**
@@ -63,31 +63,8 @@ ${projectType} for ${mainFeatures}
 `;
 }
 
-export async function runInit(dir, options) {
-  const date = new Date().toISOString().split('T')[0];
-  const { projectType, techStack, mainFeatures, framework } = options;
-
-  const dirs = [
-    '.claude/completions',
-    '.claude/sessions/active',
-    '.claude/sessions/archive',
-    '.claude/templates',
-    'docs/learnings',
-    'docs/archive',
-  ];
-  for (const d of dirs) {
-    fs.mkdirSync(path.join(dir, d), { recursive: true });
-  }
-
-  const fw = framework?.toLowerCase();
-  writeFile(path.join(dir, '.claudeignore'), getClaudeIgnore(fw));
-
-  writeFile(
-    path.join(dir, 'CLAUDE.md'),
-    buildClaudeMd(projectType, techStack, mainFeatures, date)
-  );
-
-  writeFile(path.join(dir, '.claude', 'COMMON_MISTAKES.md'), `# Common Mistakes
+export function buildCommonMistakesMd(date) {
+  return `# Common Mistakes
 
 **⚠️ CRITICAL - Read at session start**
 
@@ -112,9 +89,11 @@ export async function runInit(dir, options) {
 ---
 
 **Last Updated**: ${date}
-`);
+`;
+}
 
-  writeFile(path.join(dir, '.claude', 'QUICK_START.md'), `# Quick Start Commands
+export function buildQuickStartMd(date) {
+  return `# Quick Start Commands
 
 ---
 
@@ -131,9 +110,11 @@ export async function runInit(dir, options) {
 ---
 
 **Last Updated**: ${date}
-`);
+`;
+}
 
-  writeFile(path.join(dir, '.claude', 'ARCHITECTURE_MAP.md'), `# Architecture Map
+export function buildArchitectureMapMd(date) {
+  return `# Architecture Map
 
 ---
 
@@ -153,7 +134,37 @@ project/
 ---
 
 **Last Updated**: ${date}
-`);
+`;
+}
+
+export async function runInit(dir, options) {
+  const date = new Date().toISOString().split('T')[0];
+  const { projectType, techStack, mainFeatures, framework, force } = options;
+
+  const claudeMdPath = path.join(dir, 'CLAUDE.md');
+  if (fs.existsSync(claudeMdPath) && !force) {
+    throw new Error('CLAUDE.md already exists. Run with --force to overwrite.');
+  }
+
+  const dirs = [
+    '.claude/completions',
+    '.claude/sessions/active',
+    '.claude/sessions/archive',
+    '.claude/templates',
+    'docs/learnings',
+    'docs/archive',
+  ];
+  for (const d of dirs) {
+    fs.mkdirSync(path.join(dir, d), { recursive: true });
+  }
+
+  const fw = framework?.toLowerCase();
+  writeFile(path.join(dir, '.claudeignore'), getClaudeIgnore(fw));
+
+  writeFile(path.join(dir, 'CLAUDE.md'), buildClaudeMd(projectType, techStack, mainFeatures, date));
+  writeFile(path.join(dir, '.claude', 'COMMON_MISTAKES.md'), buildCommonMistakesMd(date));
+  writeFile(path.join(dir, '.claude', 'QUICK_START.md'), buildQuickStartMd(date));
+  writeFile(path.join(dir, '.claude', 'ARCHITECTURE_MAP.md'), buildArchitectureMapMd(date));
 
   writeFile(path.join(dir, 'docs', 'INDEX.md'), `# Documentation Index
 
@@ -185,7 +196,7 @@ export async function initCommand(options) {
   console.log(chalk.bold('╚════════════════════════════════════════════════╝'));
   console.log('');
 
-  let { framework, yes } = options;
+  let { framework, yes, force } = options;
   let projectType, techStack, mainFeatures;
 
   if (framework && !isKnownFramework(framework)) {
@@ -209,7 +220,15 @@ export async function initCommand(options) {
   }
 
   console.log(chalk.green('📁 Creating directory structure...'));
-  await runInit(dir, { framework, projectType, techStack, mainFeatures });
+  try {
+    await runInit(dir, { framework, projectType, techStack, mainFeatures, force });
+  } catch (err) {
+    if (err.message.includes('already exists')) {
+      console.log(chalk.yellow(`⚠️  ${err.message}`));
+      return;
+    }
+    throw err;
+  }
 
   console.log('');
   console.log(chalk.green('✅ Setup Complete!'));
