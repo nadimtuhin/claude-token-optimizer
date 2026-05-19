@@ -27,8 +27,13 @@ export async function scanAutoLoadFiles(dir) {
     dot: true,
   });
 
-  return files.map(filePath => ({
-    path: filePath,
-    content: fs.readFileSync(filePath, 'utf8'),
-  }));
+  const results = [];
+  for (const filePath of files) {
+    try {
+      results.push({ path: filePath, content: fs.readFileSync(filePath, 'utf8') });
+    } catch {
+      // skip unreadable files
+    }
+  }
+  return results;
 }
