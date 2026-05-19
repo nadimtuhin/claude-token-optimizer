@@ -1,0 +1,29 @@
+{
+  "name": "claude-token-optimizer",
+  "version": "2.0.0",
+  "description": "Cut Claude Code token usage by 90% — real token counts, optimized project setup",
+  "bin": {
+    "cto": "bin/cto.js"
+  },
+  "main": "src/cli.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/**/*.test.js",
+    "test:watch": "node --test --watch tests/**/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": ["claude", "claude-code", "token", "optimizer", "ai", "context"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nadimtuhin/claude-token-optimizer"
+  },
+  "dependencies": {
+    "@anthropic-ai/tokenizer": "0.0.4",
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "glob": "^11.0.0"
+  }
+}
