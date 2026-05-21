@@ -142,51 +142,71 @@ export function getClaudeIgnore(framework) {
   return extra ? `${BASE_IGNORE}\n${extra}\n` : `${BASE_IGNORE}\n`;
 }
 
+export function detectFromPackageJson(content) {
+  try {
+    const { dependencies: d = {}, devDependencies: dd = {} } = JSON.parse(content);
+    const deps = { ...d, ...dd };
+    if (deps['next']) return 'nextjs';
+    if (deps['nuxt']) return 'nuxtjs';
+    if (deps['@angular/core']) return 'angular';
+    if (deps['@nestjs/core']) return 'nestjs';
+    if (deps['svelte']) return 'svelte';
+    if (deps['vue']) return 'vue';
+    if (deps['express']) return 'express';
+  } catch { /* ignore malformed */ }
+  return null;
+}
+
+export function detectFromRequirements(content) {
+  if (/^django/im.test(content)) return 'django';
+  if (/^fastapi/im.test(content)) return 'fastapi';
+  return null;
+}
+
+export function detectFromPyproject(content) {
+  if (/django/i.test(content)) return 'django';
+  if (/fastapi/i.test(content)) return 'fastapi';
+  return null;
+}
+
+export function detectFromComposer(content) {
+  try {
+    const { require: r = {} } = JSON.parse(content);
+    if (r['laravel/framework']) return 'laravel';
+  } catch { /* ignore */ }
+  return null;
+}
+
+export function detectFromGemfile(content) {
+  return /gem ['"]rails['"]/i.test(content) ? 'rails' : null;
+}
+
+export function detectFromPom(content) {
+  return /spring-boot/i.test(content) ? 'spring-boot' : null;
+}
+
 export function detectFramework(dir) {
   const read = (f) => { try { return fs.readFileSync(path.join(dir, f), 'utf8'); } catch { return null; } };
 
   const pkg = read('package.json');
-  if (pkg) {
-    try {
-      const { dependencies: d = {}, devDependencies: dd = {} } = JSON.parse(pkg);
-      const deps = { ...d, ...dd };
-      if (deps['next']) return 'nextjs';
-      if (deps['nuxt']) return 'nuxtjs';
-      if (deps['@angular/core']) return 'angular';
-      if (deps['@nestjs/core']) return 'nestjs';
-      if (deps['svelte']) return 'svelte';
-      if (deps['vue']) return 'vue';
-      if (deps['express']) return 'express';
-    } catch { /* ignore malformed package.json */ }
-  }
+  if (pkg) { const r = detectFromPackageJson(pkg); if (r) return r; }
 
   const req = read('requirements.txt');
-  if (req) {
-    if (/^django/im.test(req)) return 'django';
-    if (/^fastapi/im.test(req)) return 'fastapi';
-  }
+  if (req) { const r = detectFromRequirements(req); if (r) return r; }
 
   const pyproject = read('pyproject.toml');
-  if (pyproject) {
-    if (/django/i.test(pyproject)) return 'django';
-    if (/fastapi/i.test(pyproject)) return 'fastapi';
-  }
+  if (pyproject) { const r = detectFromPyproject(pyproject); if (r) return r; }
 
   if (read('go.mod')) return 'go';
 
   const composer = read('composer.json');
-  if (composer) {
-    try {
-      const { require: r = {} } = JSON.parse(composer);
-      if (r['laravel/framework']) return 'laravel';
-    } catch { /* ignore */ }
-  }
+  if (composer) { const r = detectFromComposer(composer); if (r) return r; }
 
   const gemfile = read('Gemfile');
-  if (gemfile && /gem ['"]rails['"]/i.test(gemfile)) return 'rails';
+  if (gemfile) { const r = detectFromGemfile(gemfile); if (r) return r; }
 
   const pom = read('pom.xml') || read('build.gradle');
-  if (pom && /spring-boot/i.test(pom)) return 'spring-boot';
+  if (pom) { const r = detectFromPom(pom); if (r) return r; }
 
   return null;
 }

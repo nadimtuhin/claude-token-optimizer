@@ -16,6 +16,36 @@ export function computeDiff(currentContent, backupContent) {
   return { currentTokens, backupTokens, tokenDelta, tokenPct, currentLines, backupLines, lineDelta };
 }
 
+export function formatDiffReport(d, targetLabel, backupLabel) {
+  const sep = '─'.repeat(44);
+  const lines = [
+    '',
+    chalk.bold(`📊 Token diff — ${targetLabel}`),
+    '',
+    chalk.dim(`  ${sep}`),
+    `  ${'Before (' + backupLabel + '):'.padEnd(36)} ${chalk.yellow(String(d.backupTokens).padStart(6))} tokens`,
+    `  ${'After  (' + targetLabel + '):'.padEnd(36)} ${chalk.cyan(String(d.currentTokens).padStart(6))} tokens`,
+    chalk.dim(`  ${sep}`),
+  ];
+
+  if (d.tokenDelta < 0) {
+    const saved = Math.abs(d.tokenDelta);
+    lines.push(`  ${'Saved:'.padEnd(36)} ${chalk.green(String(saved).padStart(6))} tokens  ${chalk.green('(-' + d.tokenPct + '%)')}`);
+  } else if (d.tokenDelta > 0) {
+    lines.push(`  ${'Added:'.padEnd(36)} ${chalk.red('+' + d.tokenDelta.toString().padStart(5))} tokens  ${chalk.red('(+' + d.tokenPct + '%)')}`);
+  } else {
+    lines.push(`  ${chalk.dim('No token change.')}`);
+  }
+
+  const lineSign = d.lineDelta <= 0 ? '' : '+';
+  const lineColor = d.lineDelta < 0 ? chalk.green : d.lineDelta > 0 ? chalk.red : chalk.dim;
+  lines.push('');
+  lines.push(`  Line diff: ${lineColor(lineSign + d.lineDelta + ' lines')}  (${d.backupLines} → ${d.currentLines})`);
+  lines.push('');
+
+  return lines;
+}
+
 export async function diffCommand(options = {}) {
   const dir = process.cwd();
   const targetFile = options.file || 'CLAUDE.md';
@@ -38,33 +68,7 @@ export async function diffCommand(options = {}) {
   const current = fs.readFileSync(targetPath, 'utf8');
   const backup = fs.readFileSync(backupPath, 'utf8');
   const d = computeDiff(current, backup);
-
   const targetLabel = path.relative(dir, targetPath);
   const backupLabel = path.relative(dir, backupPath);
-
-  console.log('');
-  console.log(chalk.bold(`📊 Token diff — ${targetLabel}`));
-  console.log('');
-
-  const sep = '─'.repeat(44);
-  console.log(chalk.dim(`  ${sep}`));
-  console.log(`  ${'Before (' + backupLabel + '):'.padEnd(36)} ${chalk.yellow(String(d.backupTokens).padStart(6))} tokens`);
-  console.log(`  ${'After  (' + targetLabel + '):'.padEnd(36)} ${chalk.cyan(String(d.currentTokens).padStart(6))} tokens`);
-  console.log(chalk.dim(`  ${sep}`));
-
-  if (d.tokenDelta < 0) {
-    const saved = Math.abs(d.tokenDelta);
-    console.log(`  ${'Saved:'.padEnd(36)} ${chalk.green(String(saved).padStart(6))} tokens  ${chalk.green('(-' + d.tokenPct + '%)')}`);
-  } else if (d.tokenDelta > 0) {
-    console.log(`  ${'Added:'.padEnd(36)} ${chalk.red('+' + d.tokenDelta.toString().padStart(5))} tokens  ${chalk.red('(+' + d.tokenPct + '%)')}`);
-  } else {
-    console.log(`  ${chalk.dim('No token change.')}`);
-  }
-
-  console.log('');
-
-  const lineSign = d.lineDelta <= 0 ? '' : '+';
-  const lineColor = d.lineDelta < 0 ? chalk.green : d.lineDelta > 0 ? chalk.red : chalk.dim;
-  console.log(`  Line diff: ${lineColor(lineSign + d.lineDelta + ' lines')}  (${d.backupLines} → ${d.currentLines})`);
-  console.log('');
+  formatDiffReport(d, targetLabel, backupLabel).forEach((line) => console.log(line));
 }

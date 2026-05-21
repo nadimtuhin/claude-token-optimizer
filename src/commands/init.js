@@ -160,16 +160,9 @@ Add topic files in \`docs/learnings/\` and list them here.
 `;
 }
 
-export async function runInit(dir, options) {
-  const date = new Date().toISOString().split('T')[0];
-  const { projectType, techStack, mainFeatures, framework, force } = options;
-
-  const claudeMdPath = path.join(dir, 'CLAUDE.md');
-  if (fs.existsSync(claudeMdPath) && !force) {
-    throw new Error('CLAUDE.md already exists. Run with --force to overwrite.');
-  }
-
-  const dirs = [
+// Pure: returns the list of dirs to create
+export function getInitDirs() {
+  return [
     '.claude/completions',
     '.claude/sessions/active',
     '.claude/sessions/archive',
@@ -177,76 +170,69 @@ export async function runInit(dir, options) {
     'docs/learnings',
     'docs/archive',
   ];
-  for (const d of dirs) {
-    fs.mkdirSync(path.join(dir, d), { recursive: true });
-  }
+}
 
-  const fw = (framework ?? detectFramework(dir))?.toLowerCase();
+// Writes all generated files into dir
+export function writeInitFiles(dir, fw, projectType, techStack, mainFeatures, date) {
   writeFile(path.join(dir, '.claudeignore'), getClaudeIgnore(fw));
-
   writeFile(path.join(dir, 'CLAUDE.md'), buildClaudeMd(projectType, techStack, mainFeatures, date));
   writeFile(path.join(dir, '.claude', 'COMMON_MISTAKES.md'), buildCommonMistakesMd(date));
   writeFile(path.join(dir, '.claude', 'QUICK_START.md'), buildQuickStartMd(date));
   writeFile(path.join(dir, '.claude', 'ARCHITECTURE_MAP.md'), buildArchitectureMapMd(date));
-
   writeFile(path.join(dir, 'docs', 'INDEX.md'), buildDocsIndexMd(date));
 }
 
-export async function initCommand(options) {
-  const dir = process.cwd();
+// Returns { framework, detected, unknown } — pure-ish (calls detectFramework)
+export function resolveFramework(framework, dir) {
+  if (framework && !isKnownFramework(framework)) {
+    return { framework: undefined, detected: null, unknown: framework };
+  }
+  const detected = framework ? null : detectFramework(dir);
+  return { framework: framework ?? undefined, detected, unknown: null };
+}
 
+// Sync: returns default project info; null means "prompt needed"
+export function resolveProjectInfo(yes, framework) {
+  if (yes || framework) {
+    return {
+      projectType: framework ? `${framework} application` : 'Application',
+      techStack: framework ?? 'Unknown',
+      mainFeatures: 'See README',
+    };
+  }
+  return null;
+}
+
+// Async: prompts user for project info via readline interface
+export async function promptProjectInfo(rl) {
+  const projectType = await prompt(rl, 'Project Type (e.g., Express, Next.js, Django): ');
+  const techStack = await prompt(rl, 'Tech Stack (e.g., Express, PostgreSQL, Prisma): ');
+  const mainFeatures = await prompt(rl, 'Main Features (brief description): ');
+  return { projectType, techStack, mainFeatures };
+}
+
+export function printHeader() {
   console.log('');
   console.log(chalk.bold('╔════════════════════════════════════════════════╗'));
   console.log(chalk.bold('║   Claude Token Optimizer - Project Setup       ║'));
   console.log(chalk.bold('╚════════════════════════════════════════════════╝'));
   console.log('');
+}
 
-  let { framework, yes, force, hooks: installHooks } = options;
-  let projectType, techStack, mainFeatures;
-
-  if (framework && !isKnownFramework(framework)) {
-    console.log(chalk.yellow(`⚠️  Unknown framework "${framework}". Supported: ${SUPPORTED_FRAMEWORKS.join(', ')}`));
-    framework = undefined;
+export function printFrameworkInfo({ framework, detected, unknown }) {
+  if (unknown) {
+    console.log(chalk.yellow(`⚠️  Unknown framework "${unknown}". Supported: ${SUPPORTED_FRAMEWORKS.join(', ')}`));
   }
-
-  // Auto-detect framework when not explicitly provided
-  if (!framework) {
-    const detected = detectFramework(dir);
-    if (detected) {
-      console.log(chalk.dim(`🔍 Auto-detected: ${detected}  (from config file)`));
-      console.log('');
-    } else {
-      console.log(chalk.dim('ℹ️  No framework detected — using base .claudeignore'));
-      console.log('');
-    }
-  }
-
-  if (yes || framework) {
-    projectType = framework ? `${framework} application` : 'Application';
-    techStack = framework ?? 'Unknown';
-    mainFeatures = 'See README';
-  } else {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    console.log(chalk.blue('📋 Project Information'));
+  if (!framework && detected) {
+    console.log(chalk.dim(`🔍 Auto-detected: ${detected}  (from config file)`));
     console.log('');
-    projectType = await prompt(rl, 'Project Type (e.g., Express, Next.js, Django): ');
-    techStack = await prompt(rl, 'Tech Stack (e.g., Express, PostgreSQL, Prisma): ');
-    mainFeatures = await prompt(rl, 'Main Features (brief description): ');
-    rl.close();
+  } else if (!framework && !detected) {
+    console.log(chalk.dim('ℹ️  No framework detected — using base .claudeignore'));
     console.log('');
   }
+}
 
-  console.log(chalk.green('📁 Creating directory structure...'));
-  try {
-    await runInit(dir, { framework, projectType, techStack, mainFeatures, force });
-  } catch (err) {
-    if (err.message.includes('already exists')) {
-      console.log(chalk.yellow(`⚠️  ${err.message}`));
-      return;
-    }
-    throw err;
-  }
-
+export function printSetupComplete() {
   console.log('');
   console.log(chalk.green('✅ Setup Complete!'));
   console.log('');
@@ -254,18 +240,30 @@ export async function initCommand(options) {
   console.log('   • Session start: ~800 tokens (vs ~8,000 before)');
   console.log('   • Savings: ~88% reduction ⚡');
   console.log('');
+}
 
-  // Hooks setup step
+export function printNextSteps() {
+  console.log('📝 Next Steps:');
+  console.log(`   1. Customize ${chalk.cyan('.claude/COMMON_MISTAKES.md')}`);
+  console.log(`   2. Update ${chalk.cyan('.claude/QUICK_START.md')} with your commands`);
+  console.log(`   3. Fill in ${chalk.cyan('.claude/ARCHITECTURE_MAP.md')}`);
+  console.log(`   4. Add to CI: ${chalk.cyan('npx claude-token-optimizer audit --json')}`);
+  console.log('');
+  console.log(`   Run ${chalk.cyan('cto measure')} to verify savings`);
+  console.log('');
+}
+
+export async function maybeInstallHooks(installHooks, yes) {
   if (installHooks) {
-    // --hooks flag: install non-interactively
     console.log(chalk.blue('🪝 Installing Claude Code hooks...'));
     await hooksCommand('install', null, { all: true });
     console.log('');
     console.log(chalk.dim('Add hooks to ~/.claude/settings.json:'));
     await hooksCommand('settings');
     console.log('');
-  } else if (!yes) {
-    // Interactive: ask once
+    return;
+  }
+  if (!yes) {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     const ans = await new Promise(resolve => rl.question(
       chalk.blue('🪝 Set up Claude Code hooks for token monitoring? (y/N) '),
@@ -285,13 +283,55 @@ export async function initCommand(options) {
       console.log('');
     }
   }
+}
 
-  console.log('📝 Next Steps:');
-  console.log(`   1. Customize ${chalk.cyan('.claude/COMMON_MISTAKES.md')}`);
-  console.log(`   2. Update ${chalk.cyan('.claude/QUICK_START.md')} with your commands`);
-  console.log(`   3. Fill in ${chalk.cyan('.claude/ARCHITECTURE_MAP.md')}`);
-  console.log(`   4. Add to CI: ${chalk.cyan('npx claude-token-optimizer audit --json')}`);
-  console.log('');
-  console.log(`   Run ${chalk.cyan('cto measure')} to verify savings`);
-  console.log('');
+export async function runInit(dir, options) {
+  const date = new Date().toISOString().split('T')[0];
+  const { projectType, techStack, mainFeatures, framework, force } = options;
+
+  const claudeMdPath = path.join(dir, 'CLAUDE.md');
+  if (fs.existsSync(claudeMdPath) && !force) {
+    throw new Error('CLAUDE.md already exists. Run with --force to overwrite.');
+  }
+
+  for (const d of getInitDirs()) {
+    fs.mkdirSync(path.join(dir, d), { recursive: true });
+  }
+
+  const fw = (framework ?? detectFramework(dir))?.toLowerCase();
+  writeInitFiles(dir, fw, projectType, techStack, mainFeatures, date);
+}
+
+export async function initCommand(options) {
+  printHeader();
+
+  let { framework, yes, force, hooks: installHooks } = options;
+  const resolved = resolveFramework(framework, process.cwd());
+  framework = resolved.framework;
+  printFrameworkInfo(resolved);
+
+  let projectInfo = resolveProjectInfo(yes, framework);
+  if (!projectInfo) {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    console.log(chalk.blue('📋 Project Information'));
+    console.log('');
+    projectInfo = await promptProjectInfo(rl);
+    rl.close();
+    console.log('');
+  }
+
+  console.log(chalk.green('📁 Creating directory structure...'));
+  try {
+    await runInit(process.cwd(), { framework, ...projectInfo, force });
+  } catch (err) {
+    if (err.message.includes('already exists')) {
+      console.log(chalk.yellow(`⚠️  ${err.message}`));
+      return;
+    }
+    throw err;
+  }
+
+  printSetupComplete();
+  await maybeInstallHooks(installHooks, yes);
+  printNextSteps();
 }

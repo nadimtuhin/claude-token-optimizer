@@ -1,35 +1,153 @@
-import { describe, it, beforeEach, afterEach } from 'node:test';
+import { describe, it, before, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { execSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { runInit } from '../src/commands/init.js';
+import {
+  runInit,
+  buildClaudeMd,
+  buildCommonMistakesMd,
+  buildQuickStartMd,
+  buildArchitectureMapMd,
+  buildDocsIndexMd,
+  getInitDirs,
+  resolveFramework,
+  resolveProjectInfo,
+} from '../src/commands/init.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const CTO = path.join(ROOT, 'bin', 'cto.js');
 
-let tmpDir;
+// ── unit — pure logic ──────────────────────────────────────────────────────
 
-beforeEach(() => {
-  tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cto-init-'));
+describe('unit — pure logic', () => {
+  const DATE = '2026-01-01';
+
+  describe('buildClaudeMd', () => {
+    it('returns a string', () => {
+      assert.equal(typeof buildClaudeMd('App', 'Node', 'API', DATE), 'string');
+    });
+    it('contains project type', () => {
+      assert.ok(buildClaudeMd('MyApp', 'Node', 'API', DATE).includes('MyApp'));
+    });
+    it('contains tech stack', () => {
+      assert.ok(buildClaudeMd('App', 'PostgreSQL', 'API', DATE).includes('PostgreSQL'));
+    });
+    it('contains main features', () => {
+      assert.ok(buildClaudeMd('App', 'Node', 'REST endpoints', DATE).includes('REST endpoints'));
+    });
+    it('contains Last Updated date', () => {
+      assert.ok(buildClaudeMd('App', 'Node', 'API', DATE).includes(DATE));
+    });
+  });
+
+  describe('buildCommonMistakesMd', () => {
+    it('returns a string containing date', () => {
+      assert.ok(buildCommonMistakesMd(DATE).includes(DATE));
+    });
+    it('contains Critical heading', () => {
+      assert.ok(buildCommonMistakesMd(DATE).includes('Common Mistakes'));
+    });
+  });
+
+  describe('buildQuickStartMd', () => {
+    it('returns a string containing date', () => {
+      assert.ok(buildQuickStartMd(DATE).includes(DATE));
+    });
+    it('contains Quick Start heading', () => {
+      assert.ok(buildQuickStartMd(DATE).includes('Quick Start'));
+    });
+  });
+
+  describe('buildArchitectureMapMd', () => {
+    it('returns a string containing date', () => {
+      assert.ok(buildArchitectureMapMd(DATE).includes(DATE));
+    });
+    it('contains Architecture Map heading', () => {
+      assert.ok(buildArchitectureMapMd(DATE).includes('Architecture Map'));
+    });
+  });
+
+  describe('buildDocsIndexMd', () => {
+    it('returns a string containing date', () => {
+      assert.ok(buildDocsIndexMd(DATE).includes(DATE));
+    });
+    it('contains Documentation Index heading', () => {
+      assert.ok(buildDocsIndexMd(DATE).includes('Documentation Index'));
+    });
+  });
+
+  describe('getInitDirs', () => {
+    it('returns an array', () => {
+      assert.ok(Array.isArray(getInitDirs()));
+    });
+    it('includes .claude/completions', () => {
+      assert.ok(getInitDirs().includes('.claude/completions'));
+    });
+    it('includes docs/archive', () => {
+      assert.ok(getInitDirs().includes('docs/archive'));
+    });
+  });
+
+  describe('resolveFramework', () => {
+    it('returns unknown for unrecognized framework', () => {
+      const r = resolveFramework('fakefwxyz', '/tmp');
+      assert.equal(r.framework, undefined);
+      assert.equal(r.unknown, 'fakefwxyz');
+    });
+    it('returns framework unchanged when known', () => {
+      const r = resolveFramework('express', '/tmp');
+      assert.equal(r.framework, 'express');
+      assert.equal(r.unknown, null);
+    });
+    it('returns detected=null when framework is explicit', () => {
+      const r = resolveFramework('express', '/tmp');
+      assert.equal(r.detected, null);
+    });
+  });
+
+  describe('resolveProjectInfo', () => {
+    it('returns defaults when yes=true', () => {
+      const info = resolveProjectInfo(true, undefined);
+      assert.equal(info.projectType, 'Application');
+      assert.equal(info.techStack, 'Unknown');
+    });
+    it('uses framework name when framework provided', () => {
+      const info = resolveProjectInfo(false, 'express');
+      assert.equal(info.projectType, 'express application');
+      assert.equal(info.techStack, 'express');
+    });
+    it('returns null when neither yes nor framework', () => {
+      assert.equal(resolveProjectInfo(false, undefined), null);
+    });
+  });
 });
 
-afterEach(() => {
-  fs.rmSync(tmpDir, { recursive: true });
-});
+// ── integration — filesystem ───────────────────────────────────────────────
 
-const defaultOptions = {
-  framework: 'express',
-  yes: true,
-  projectType: 'Express API',
-  techStack: 'Express, PostgreSQL',
-  mainFeatures: 'REST API',
-};
+describe('integration — filesystem', () => {
+  let tmpDir;
 
-describe('runInit', () => {
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cto-init-'));
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true });
+  });
+
+  const defaultOptions = {
+    framework: 'express',
+    yes: true,
+    projectType: 'Express API',
+    techStack: 'Express, PostgreSQL',
+    mainFeatures: 'REST API',
+  };
+
   it('creates .claude/ directory', async () => {
     await runInit(tmpDir, defaultOptions);
     assert.ok(fs.existsSync(path.join(tmpDir, '.claude')));
@@ -97,6 +215,26 @@ describe('runInit', () => {
     const content = fs.readFileSync(path.join(tmpDir, 'CLAUDE.md'), 'utf8');
     assert.ok(!content.includes('existing content'));
     assert.ok(content.includes('Express API'));
+  });
+});
+
+// ── e2e — subprocess ───────────────────────────────────────────────────────
+
+describe('e2e — subprocess', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cto-e2e-'));
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true });
+  });
+
+  it('exits 0 and creates CLAUDE.md', () => {
+    const result = spawnSync('node', [CTO, 'init', '--yes'], { cwd: tmpDir, encoding: 'utf8' });
+    assert.equal(result.status, 0, `expected exit 0, got ${result.status}. stderr: ${result.stderr}`);
+    assert.ok(fs.existsSync(path.join(tmpDir, 'CLAUDE.md')));
   });
 
   it('shows auto-detected framework when package.json has known dep', () => {

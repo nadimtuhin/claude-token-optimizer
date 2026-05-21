@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import fs from 'node:fs';
 import path from 'node:path';
 import { countTokens } from '../lib/tokenizer.js';
@@ -14,68 +13,91 @@ const WATCHED = [
 const WRITE_LOG = '.claude/sessions/write-log.md';
 const BAR_WIDTH = 10;
 
-function bar(tokens, target) {
+export function bar(tokens, target) {
   if (!target || target <= 0) return '          ';
   const pct = Math.min(tokens / target, 1);
   const filled = Math.round(pct * BAR_WIDTH);
   return '█'.repeat(filled) + '░'.repeat(BAR_WIDTH - filled);
 }
 
-export function buildWatchDisplay(dir, now = new Date()) {
-  const ts = now.toISOString().replace('T', ' ').slice(0, 19);
-  const lines = [];
+export function formatFileRow(rel, tokens, target) {
+  const label = rel.padEnd(34);
+  const tok = String(tokens).padStart(5);
+  const tgt = target ? `  target: ${target}` : '';
+  return `  ${label} ${tok} tokens  ${bar(tokens, target)}${tgt}`;
+}
 
-  lines.push(`cto watch — token monitor  [${ts}]`);
-  lines.push('');
-  lines.push('Auto-loaded files:');
+export function parseWriteLogEntries(logContent) {
+  const entries = [...logContent.matchAll(/^\|\s+([^|]+?)\s+\|\s+(\d+)\s+\|\s+([^|]+?)\s+\|/gm)];
+  return entries.map(([, filePath, tokStr, time]) => ({
+    filePath: filePath.trim(),
+    tokStr,
+    time: time.trim(),
+  }));
+}
 
+export function formatWriteLogRow(entry) {
+  const label = entry.filePath.padEnd(34);
+  const tok = String(entry.tokStr).padStart(5);
+  return `  ${label} ${tok} tokens  (${entry.time})`;
+}
+
+export function buildFileRows(watchedEntries, dir) {
   let total = 0;
   let totalTarget = 0;
-  for (const { rel, target } of WATCHED) {
+  const lines = watchedEntries.map(({ rel, target }) => {
     const abs = path.join(dir, rel);
-    let tokens = 0;
-    if (fs.existsSync(abs)) {
-      tokens = countTokens(fs.readFileSync(abs, 'utf8'));
-    }
+    const tokens = fs.existsSync(abs) ? countTokens(fs.readFileSync(abs, 'utf8')) : 0;
     total += tokens;
     if (target) totalTarget += target;
+    return formatFileRow(rel, tokens, target);
+  });
+  return { lines, total, totalTarget };
+}
 
-    const label = rel.padEnd(34);
-    const tok = String(tokens).padStart(5);
-    const b = bar(tokens, target);
-    const tgt = target ? `  target: ${target}` : '';
-    lines.push(`  ${label} ${tok} tokens  ${b}${tgt}`);
-  }
-
-  const totalBar = bar(total, totalTarget || 1050);
+export function buildWatchDisplay(dir, now = new Date()) {
+  const ts = now.toISOString().replace('T', ' ').slice(0, 19);
+  const { lines: fileLines, total, totalTarget } = buildFileRows(WATCHED, dir);
   const pct = totalTarget ? Math.round((total / totalTarget) * 100) : 0;
-  lines.push('');
-  lines.push(`  ${'Total:'.padEnd(34)} ${String(total).padStart(5)} / ${totalTarget} tokens  ${totalBar}  ${pct}% of target`);
+  const totalBar = bar(total, totalTarget || 1050);
+  const lines = [
+    `cto watch — token monitor  [${ts}]`, '',
+    'Auto-loaded files:', ...fileLines, '',
+    `  ${'Total:'.padEnd(34)} ${String(total).padStart(5)} / ${totalTarget} tokens  ${totalBar}  ${pct}% of target`,
+  ];
 
   const writeLog = path.join(dir, WRITE_LOG);
   if (fs.existsSync(writeLog)) {
-    lines.push('');
-    lines.push('Session writes (from hook log):');
-    const logContent = fs.readFileSync(writeLog, 'utf8');
-    const entries = [...logContent.matchAll(/^\|\s+([^|]+?)\s+\|\s+(\d+)\s+\|\s+([^|]+?)\s+\|/gm)];
-    const recent = entries.slice(-5).reverse();
-    for (const [, filePath, tokStr, time] of recent) {
-      const label = filePath.trim().padEnd(34);
-      const tok = String(tokStr).padStart(5);
-      lines.push(`  ${label} ${tok} tokens  (${time.trim()})`);
-    }
+    const entries = parseWriteLogEntries(fs.readFileSync(writeLog, 'utf8'));
+    lines.push('', 'Session writes (from hook log):', ...entries.slice(-5).reverse().map(formatWriteLogRow));
   }
 
-  lines.push('');
-  lines.push('Press Ctrl+C to stop');
-
+  lines.push('', 'Press Ctrl+C to stop');
   return lines.join('\n');
+}
+
+export function setupFileWatchers(dir, watched, writeLog, onUpdate) {
+  const watchers = [];
+  for (const { rel } of [...watched, { rel: writeLog }]) {
+    try { watchers.push(fs.watch(path.join(dir, rel), onUpdate)); } catch { /* file may not exist */ }
+  }
+  return watchers;
+}
+
+export function setupDirWatchers(dir, onUpdate) {
+  const dirs = [dir, path.join(dir, '.claude'), path.join(dir, '.claude', 'sessions'), path.join(dir, 'docs')];
+  const watchers = [];
+  for (const watchDir of dirs) {
+    if (fs.existsSync(watchDir)) {
+      try { watchers.push(fs.watch(watchDir, onUpdate)); } catch { /* ignore */ }
+    }
+  }
+  return watchers;
 }
 
 export async function watchCommand(options = {}) {
   const dir = process.cwd();
-  const interval = options.interval ? parseInt(options.interval, 10) * 1000 : null;
-
+  const intervalMs = options.interval ? parseInt(options.interval, 10) * 1000 : null;
   let debounce = null;
 
   function redraw() {
@@ -89,42 +111,21 @@ export async function watchCommand(options = {}) {
   }
 
   redraw();
+  const timer = intervalMs ? setInterval(redraw, intervalMs) : null;
+  const watchers = intervalMs ? [] : [
+    ...setupFileWatchers(dir, WATCHED, WRITE_LOG, scheduleRedraw),
+    ...setupDirWatchers(dir, scheduleRedraw),
+  ];
 
-  const watchers = [];
-
-  if (interval) {
-    const timer = setInterval(redraw, interval);
-    watchers.push({ close: () => clearInterval(timer) });
-  } else {
-    for (const { rel } of [...WATCHED, { rel: WRITE_LOG }]) {
-      const abs = path.join(dir, rel);
-      try {
-        const watcher = fs.watch(abs, scheduleRedraw);
-        watchers.push(watcher);
-      } catch {
-        // file may not exist yet; that's fine
-      }
-    }
-    // Also watch directories in case files are created
-    for (const watchDir of [dir, path.join(dir, '.claude'), path.join(dir, '.claude', 'sessions'), path.join(dir, 'docs')]) {
-      if (fs.existsSync(watchDir)) {
-        try {
-          const watcher = fs.watch(watchDir, scheduleRedraw);
-          watchers.push(watcher);
-        } catch {
-          // ignore
-        }
-      }
-    }
-  }
-
-  process.on('SIGINT', () => {
+  function cleanup() {
     if (debounce) clearTimeout(debounce);
+    if (timer) clearInterval(timer);
     for (const w of watchers) w.close();
     process.stdout.write('\n');
-    process.exit(0);
-  });
+  }
 
-  // Keep alive
+  process.on('SIGINT', () => { cleanup(); process.exit(0); });
+  process.on('SIGTERM', () => { cleanup(); process.exit(0); });
+
   await new Promise(() => {});
 }

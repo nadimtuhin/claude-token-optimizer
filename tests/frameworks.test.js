@@ -3,145 +3,237 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { detectFramework, getClaudeIgnore } from '../src/lib/frameworks.js';
+import {
+  detectFramework,
+  getClaudeIgnore,
+  detectFromPackageJson,
+  detectFromRequirements,
+  detectFromPyproject,
+  detectFromComposer,
+  detectFromGemfile,
+  detectFromPom,
+} from '../src/lib/frameworks.js';
 
-let tmpDir;
+describe('unit — pure logic', () => {
+  describe('detectFromPackageJson', () => {
+    it('detects nextjs', () => {
+      assert.strictEqual(detectFromPackageJson(JSON.stringify({ dependencies: { next: '14.0.0' } })), 'nextjs');
+    });
+    it('detects nuxtjs', () => {
+      assert.strictEqual(detectFromPackageJson(JSON.stringify({ dependencies: { nuxt: '3.0.0' } })), 'nuxtjs');
+    });
+    it('detects angular', () => {
+      assert.strictEqual(detectFromPackageJson(JSON.stringify({ dependencies: { '@angular/core': '17.0.0' } })), 'angular');
+    });
+    it('detects nestjs', () => {
+      assert.strictEqual(detectFromPackageJson(JSON.stringify({ dependencies: { '@nestjs/core': '10.0.0' } })), 'nestjs');
+    });
+    it('detects svelte from devDependencies', () => {
+      assert.strictEqual(detectFromPackageJson(JSON.stringify({ devDependencies: { svelte: '4.0.0' } })), 'svelte');
+    });
+    it('detects vue', () => {
+      assert.strictEqual(detectFromPackageJson(JSON.stringify({ dependencies: { vue: '3.0.0' } })), 'vue');
+    });
+    it('detects express', () => {
+      assert.strictEqual(detectFromPackageJson(JSON.stringify({ dependencies: { express: '4.18.0' } })), 'express');
+    });
+    it('next takes priority over vue', () => {
+      assert.strictEqual(detectFromPackageJson(JSON.stringify({ dependencies: { next: '14.0.0', vue: '3.0.0' } })), 'nextjs');
+    });
+    it('returns null for unknown deps', () => {
+      assert.strictEqual(detectFromPackageJson(JSON.stringify({ dependencies: { lodash: '4.0.0' } })), null);
+    });
+    it('returns null for malformed JSON', () => {
+      assert.strictEqual(detectFromPackageJson('not json'), null);
+    });
+  });
 
-beforeEach(() => {
-  tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cto-fw-'));
+  describe('detectFromRequirements', () => {
+    it('detects django', () => {
+      assert.strictEqual(detectFromRequirements('Django==4.2\npsycopg2==2.9\n'), 'django');
+    });
+    it('detects fastapi', () => {
+      assert.strictEqual(detectFromRequirements('fastapi==0.100.0\nuvicorn==0.22.0\n'), 'fastapi');
+    });
+    it('returns null for unknown content', () => {
+      assert.strictEqual(detectFromRequirements('numpy==1.24.0\n'), null);
+    });
+  });
+
+  describe('detectFromPyproject', () => {
+    it('detects django', () => {
+      assert.strictEqual(detectFromPyproject('[tool.django]\nname = "myapp"'), 'django');
+    });
+    it('detects fastapi', () => {
+      assert.strictEqual(detectFromPyproject('dependencies = ["fastapi>=0.100"]'), 'fastapi');
+    });
+    it('returns null for unknown content', () => {
+      assert.strictEqual(detectFromPyproject('[tool.pytest]\n'), null);
+    });
+  });
+
+  describe('detectFromComposer', () => {
+    it('detects laravel', () => {
+      assert.strictEqual(detectFromComposer(JSON.stringify({ require: { 'laravel/framework': '^10.0' } })), 'laravel');
+    });
+    it('returns null for other packages', () => {
+      assert.strictEqual(detectFromComposer(JSON.stringify({ require: { 'symfony/framework': '6.0' } })), null);
+    });
+    it('returns null for malformed JSON', () => {
+      assert.strictEqual(detectFromComposer('not json'), null);
+    });
+  });
+
+  describe('detectFromGemfile', () => {
+    it('detects rails', () => {
+      assert.strictEqual(detectFromGemfile("source 'https://rubygems.org'\ngem 'rails', '~> 7.1'\n"), 'rails');
+    });
+    it('returns null for non-rails Gemfile', () => {
+      assert.strictEqual(detectFromGemfile("gem 'sinatra'\n"), null);
+    });
+  });
+
+  describe('detectFromPom', () => {
+    it('detects spring-boot', () => {
+      assert.strictEqual(detectFromPom('<artifactId>spring-boot-starter-web</artifactId>'), 'spring-boot');
+    });
+    it('returns null for non-spring pom', () => {
+      assert.strictEqual(detectFromPom('<artifactId>my-app</artifactId>'), null);
+    });
+  });
+
+  describe('getClaudeIgnore', () => {
+    it('nextjs ignore contains snapshot patterns', () => {
+      const content = getClaudeIgnore('nextjs');
+      assert.ok(content.includes('*.snap'));
+      assert.ok(content.includes('__snapshots__'));
+    });
+
+    it('express ignore contains *.min.js', () => {
+      assert.ok(getClaudeIgnore('express').includes('*.min.js'));
+    });
+
+    it('django ignore contains migrations pattern', () => {
+      assert.ok(getClaudeIgnore('django').includes('migrations'));
+    });
+
+    it('go ignore contains *.pb.go', () => {
+      assert.ok(getClaudeIgnore('go').includes('*.pb.go'));
+    });
+
+    it('laravel ignore contains *.lock', () => {
+      assert.ok(getClaudeIgnore('laravel').includes('*.lock'));
+    });
+
+    it('base ignore contains user-facing doc exclusions', () => {
+      const content = getClaudeIgnore(null);
+      assert.ok(content.includes('README.md'));
+      assert.ok(content.includes('CHANGELOG.md'));
+      assert.ok(content.includes('CONTRIBUTING.md'));
+      assert.ok(content.includes('GEMINI.md'));
+      assert.ok(content.includes('AGENTS.md'));
+      assert.ok(content.includes('.cursorrules'));
+      assert.ok(content.includes('.windsurfrules'));
+      assert.ok(content.includes('.clinerules'));
+      assert.ok(content.includes('.roomodes'));
+    });
+
+    it('framework-specific ignore inherits base user-facing doc exclusions', () => {
+      const content = getClaudeIgnore('express');
+      assert.ok(content.includes('README.md'));
+      assert.ok(content.includes('CONTRIBUTING.md'));
+    });
+  });
 });
 
-afterEach(() => {
-  fs.rmSync(tmpDir, { recursive: true });
-});
+describe('integration — filesystem', () => {
+  let tmpDir;
 
-function write(rel, content) {
-  const full = path.join(tmpDir, rel);
-  fs.mkdirSync(path.dirname(full), { recursive: true });
-  fs.writeFileSync(full, content, 'utf8');
-}
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cto-fw-'));
+  });
 
-describe('detectFramework', () => {
-  it('returns null for empty directory', () => {
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true });
+  });
+
+  function write(rel, content) {
+    const full = path.join(tmpDir, rel);
+    fs.mkdirSync(path.dirname(full), { recursive: true });
+    fs.writeFileSync(full, content, 'utf8');
+  }
+
+  it('detectFramework: returns null for empty directory', () => {
     assert.strictEqual(detectFramework(tmpDir), null);
   });
 
-  it('detects nextjs from package.json dependencies', () => {
+  it('detectFramework: detects nextjs from package.json', () => {
     write('package.json', JSON.stringify({ dependencies: { next: '14.0.0' } }));
     assert.strictEqual(detectFramework(tmpDir), 'nextjs');
   });
 
-  it('detects nuxtjs from package.json', () => {
+  it('detectFramework: detects nuxtjs from package.json', () => {
     write('package.json', JSON.stringify({ dependencies: { nuxt: '3.0.0' } }));
     assert.strictEqual(detectFramework(tmpDir), 'nuxtjs');
   });
 
-  it('detects angular from package.json', () => {
+  it('detectFramework: detects angular from package.json', () => {
     write('package.json', JSON.stringify({ dependencies: { '@angular/core': '17.0.0' } }));
     assert.strictEqual(detectFramework(tmpDir), 'angular');
   });
 
-  it('detects nestjs from package.json', () => {
+  it('detectFramework: detects nestjs from package.json', () => {
     write('package.json', JSON.stringify({ dependencies: { '@nestjs/core': '10.0.0' } }));
     assert.strictEqual(detectFramework(tmpDir), 'nestjs');
   });
 
-  it('detects svelte from package.json', () => {
+  it('detectFramework: detects svelte from package.json', () => {
     write('package.json', JSON.stringify({ devDependencies: { svelte: '4.0.0' } }));
     assert.strictEqual(detectFramework(tmpDir), 'svelte');
   });
 
-  it('detects vue from package.json', () => {
+  it('detectFramework: detects vue from package.json', () => {
     write('package.json', JSON.stringify({ dependencies: { vue: '3.0.0' } }));
     assert.strictEqual(detectFramework(tmpDir), 'vue');
   });
 
-  it('detects express from package.json', () => {
+  it('detectFramework: detects express from package.json', () => {
     write('package.json', JSON.stringify({ dependencies: { express: '4.18.0' } }));
     assert.strictEqual(detectFramework(tmpDir), 'express');
   });
 
-  it('detects django from requirements.txt', () => {
+  it('detectFramework: detects django from requirements.txt', () => {
     write('requirements.txt', 'Django==4.2\npsycopg2==2.9\n');
     assert.strictEqual(detectFramework(tmpDir), 'django');
   });
 
-  it('detects fastapi from requirements.txt', () => {
+  it('detectFramework: detects fastapi from requirements.txt', () => {
     write('requirements.txt', 'fastapi==0.100.0\nuvicorn==0.22.0\n');
     assert.strictEqual(detectFramework(tmpDir), 'fastapi');
   });
 
-  it('detects go from go.mod', () => {
+  it('detectFramework: detects go from go.mod', () => {
     write('go.mod', 'module example.com/myapp\n\ngo 1.21\n');
     assert.strictEqual(detectFramework(tmpDir), 'go');
   });
 
-  it('detects laravel from composer.json', () => {
+  it('detectFramework: detects laravel from composer.json', () => {
     write('composer.json', JSON.stringify({ require: { 'laravel/framework': '^10.0' } }));
     assert.strictEqual(detectFramework(tmpDir), 'laravel');
   });
 
-  it('detects rails from Gemfile', () => {
+  it('detectFramework: detects rails from Gemfile', () => {
     write('Gemfile', "source 'https://rubygems.org'\ngem 'rails', '~> 7.1'\n");
     assert.strictEqual(detectFramework(tmpDir), 'rails');
   });
 
-  it('next takes priority over other node deps', () => {
+  it('detectFramework: next takes priority over other node deps', () => {
     write('package.json', JSON.stringify({ dependencies: { next: '14.0.0', vue: '3.0.0' } }));
     assert.strictEqual(detectFramework(tmpDir), 'nextjs');
   });
 
-  it('falls back to null for unknown package.json', () => {
+  it('detectFramework: falls back to null for unknown package.json', () => {
     write('package.json', JSON.stringify({ dependencies: { lodash: '4.0.0' } }));
     assert.strictEqual(detectFramework(tmpDir), null);
-  });
-});
-
-describe('getClaudeIgnore — enriched patterns', () => {
-  it('nextjs ignore contains snapshot patterns', () => {
-    const content = getClaudeIgnore('nextjs');
-    assert.ok(content.includes('*.snap'));
-    assert.ok(content.includes('__snapshots__'));
-  });
-
-  it('express ignore contains *.min.js', () => {
-    const content = getClaudeIgnore('express');
-    assert.ok(content.includes('*.min.js'));
-  });
-
-  it('django ignore contains migrations pattern', () => {
-    const content = getClaudeIgnore('django');
-    assert.ok(content.includes('migrations'));
-  });
-
-  it('go ignore contains *.pb.go', () => {
-    const content = getClaudeIgnore('go');
-    assert.ok(content.includes('*.pb.go'));
-  });
-
-  it('laravel ignore contains *.lock', () => {
-    const content = getClaudeIgnore('laravel');
-    assert.ok(content.includes('*.lock'));
-  });
-});
-
-describe('getClaudeIgnore — base patterns', () => {
-  it('base ignore contains user-facing doc exclusions', () => {
-    const content = getClaudeIgnore(null);
-    assert.ok(content.includes('README.md'), 'should exclude README.md');
-    assert.ok(content.includes('CHANGELOG.md'), 'should exclude CHANGELOG.md');
-    assert.ok(content.includes('CONTRIBUTING.md'), 'should exclude CONTRIBUTING.md');
-    assert.ok(content.includes('GEMINI.md'), 'should exclude GEMINI.md');
-    assert.ok(content.includes('AGENTS.md'), 'should exclude AGENTS.md');
-    assert.ok(content.includes('.cursorrules'), 'should exclude .cursorrules');
-    assert.ok(content.includes('.windsurfrules'), 'should exclude .windsurfrules');
-    assert.ok(content.includes('.clinerules'), 'should exclude .clinerules');
-    assert.ok(content.includes('.roomodes'), 'should exclude .roomodes');
-  });
-
-  it('framework-specific ignore inherits base user-facing doc exclusions', () => {
-    const content = getClaudeIgnore('express');
-    assert.ok(content.includes('README.md'), 'express should inherit README.md exclusion');
-    assert.ok(content.includes('CONTRIBUTING.md'), 'express should inherit CONTRIBUTING.md exclusion');
   });
 });
