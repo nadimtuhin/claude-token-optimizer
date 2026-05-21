@@ -63,6 +63,39 @@ describe('findPruneTargets', () => {
     assert.ok(!targets.some(t => t.type === 'empty' && t.heading === 'Overview'));
   });
 
+  // Regression: a parent heading with no direct body but with child subsections
+  // must NOT be flagged "empty". removeSection deletes through the next
+  // same-or-higher-level heading, so pruning the parent would silently delete
+  // the children's content (data loss).
+  it('does not flag a parent heading that has child subsections as empty', () => {
+    const content = '# Project\n\n## Setup\n### Step 1\ndo this\n\n## Notes\n';
+    const targets = findPruneTargets(content);
+    assert.ok(!targets.some(t => t.type === 'empty' && t.heading === 'Setup'),
+      'parent with subsections must not be treated as empty');
+    // The genuinely empty trailing sibling is still flagged.
+    assert.ok(targets.some(t => t.type === 'empty' && t.heading === 'Notes'),
+      'trailing empty section should still be flagged');
+  });
+
+  it('still flags a genuinely empty leaf section (no body, no children)', () => {
+    const content = '# Project\n\n## Done Stuff\n\n## Empty\n\n## Active\n\ncontent\n';
+    const targets = findPruneTargets(content);
+    assert.ok(targets.some(t => t.type === 'empty' && t.heading === 'Empty'));
+  });
+
+  it('pruning an empty parent would have destroyed child content (guard regression)', () => {
+    // Demonstrates the data-loss path the detection fix prevents: if the parent
+    // were ever flagged empty, removeSection would erase the child content too.
+    const content = '# Project\n\n## Setup\n### Step 1\ndo this\n\n## Notes\n';
+    const emptyTargets = findPruneTargets(content).filter(t => t.type === 'empty');
+    assert.ok(!emptyTargets.some(t => t.heading === 'Setup'),
+      'Setup must not be a prune target');
+    // Sanity: removing Setup directly is destructive, proving why the guard matters.
+    const destructive = removeSection(content, '## Setup');
+    assert.ok(!destructive.includes('do this'),
+      'removeSection on a parent is destructive — confirms the detection guard is required');
+  });
+
   it('returns empty array for clean CLAUDE.md', () => {
     const content = [
       '# Project',

@@ -33,7 +33,8 @@ export function findPruneTargets(content) {
   const targets = [];
   const sections = parseSections(content);
 
-  for (const sec of sections) {
+  for (let si = 0; si < sections.length; si++) {
+    const sec = sections[si];
     const heading = sec.heading.trim();
 
     // Completed / Done sections
@@ -64,8 +65,13 @@ export function findPruneTargets(content) {
       continue;
     }
 
-    // Empty sections (header with no content or only whitespace) — skip H1 (structural)
-    if (sec.level >= 2 && !sec.content.trim()) {
+    // Empty sections (header with no content or only whitespace) — skip H1 (structural).
+    // A heading is only "empty" if it has no body AND no child sections: if the
+    // next section is deeper-nested, this heading is a parent and removing it
+    // would silently delete its subsections (see removeSection level logic).
+    const next = sections[si + 1];
+    const hasChild = next && next.level > sec.level;
+    if (sec.level >= 2 && !sec.content.trim() && !hasChild) {
       targets.push({
         type: 'empty',
         heading,

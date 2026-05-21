@@ -20,6 +20,7 @@ GEMINI.md
 CLAUDE.md
 docs/INDEX.md
 
-# WoterClip local state (not for repo)
-.woterclip/.heartbeat-lock
-.woterclip/tasks/
+# Local agent/tool state and build artifacts (not for repo)
+.woterclip/
+.antigravitycli/
+*.tgz

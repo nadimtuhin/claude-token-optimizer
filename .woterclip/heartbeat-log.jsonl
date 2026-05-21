@@ -1,5 +1,0 @@
-{"heartbeat": 18, "timestamp": "2026-05-20T00:00:00Z", "issue": "local-queue", "persona": "ceo", "duration_sec": 60, "status": "completed", "actions": ["CEO-061: init.sh runtime deprecation warning"]}
-{"heartbeat": 19, "timestamp": "2026-05-20T00:10:00Z", "issue": "local-queue", "persona": "ceo", "duration_sec": 90, "status": "completed", "actions": ["CEO-062: fill project essential docs"]}
-{"heartbeat": 20, "timestamp": "2026-05-20T00:20:00Z", "issue": "local-queue", "persona": "ceo", "duration_sec": 120, "status": "completed", "actions": ["fix bin/cto.js reference in CLAUDE.md and QUICK_START.md", "CEO-063: .claudeignore excludes non-dev docs, 33717->7809 tokens"]}
-{"heartbeat": 21, "timestamp": "2026-05-20T00:30:00Z", "issue": "local-queue", "persona": "ceo", "duration_sec": 120, "status": "completed", "actions": ["CEO-064: Release v2.3.4"]}
-{"heartbeat": 22, "timestamp": "2026-05-20T00:40:00Z", "issue": "local-queue", "persona": "ceo", "duration_sec": 60, "status": "completed", "actions": ["docs/INDEX.md: accurate token counts and updated date", "CEO decision: recommend pausing heartbeats — project complete"]}
