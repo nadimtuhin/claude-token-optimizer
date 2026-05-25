@@ -138,6 +138,58 @@ project/
 `;
 }
 
+export function buildSessionProtocolSection() {
+  return `## Session Start Protocol ⚡
+
+**MANDATORY** at start of each session:
+
+\`\`\`bash
+# Load essential docs (~800 tokens - 2 min read)
+✓ .claude/COMMON_MISTAKES.md      # ⚠️ CRITICAL - Read FIRST
+✓ .claude/QUICK_START.md          # Essential commands
+✓ .claude/ARCHITECTURE_MAP.md     # File locations
+\`\`\`
+
+**At task completion:**
+- Create completion doc in \`.claude/completions/YYYY-MM-DD-task-name.md\`
+- Move session file to \`.claude/sessions/archive/\` (if created)
+
+**⚠️ NEVER auto-load:**
+- Files in \`.claude/completions/\` (0 token cost)
+- Files in \`.claude/sessions/\` (0 token cost)
+- Files in \`docs/archive/\` (0 token cost)`;
+}
+
+// Returns section names missing from existingContent
+export function getMissingCtoSections(existingContent) {
+  const missing = [];
+  if (!existingContent.includes('## Session Start Protocol')) {
+    missing.push('Session Start Protocol');
+  }
+  return missing;
+}
+
+// Appends missing cto sections to existingContent, returns new content
+export function appendCtoSections(existingContent, date) {
+  const missing = getMissingCtoSections(existingContent);
+  if (missing.length === 0) return { content: existingContent, added: [] };
+
+  const ctoFooter = `\n\n---\n\n**Last Updated**: ${date}\n**Optimized with**: [Claude Token Optimizer](https://github.com/nadimtuhin/claude-token-optimizer)\n`;
+
+  // Strip existing cto footer to avoid duplication before re-appending
+  const stripped = existingContent.replace(
+    /\n*---\n+\*\*Last Updated\*\*:[^\n]*\n\*\*Optimized with\*\*:[^\n]*\n?$/,
+    ''
+  ).trimEnd();
+
+  const additions = missing.map(name => {
+    if (name === 'Session Start Protocol') return `\n\n---\n\n${buildSessionProtocolSection()}`;
+    return '';
+  }).join('');
+
+  return { content: stripped + additions + ctoFooter, added: missing };
+}
+
 export function buildDocsIndexMd(date) {
   return `# Documentation Index
 
@@ -290,16 +342,30 @@ export async function runInit(dir, options) {
   const { projectType, techStack, mainFeatures, framework, force } = options;
 
   const claudeMdPath = path.join(dir, 'CLAUDE.md');
-  if (fs.existsSync(claudeMdPath) && !force) {
-    throw new Error('CLAUDE.md already exists. Run with --force to overwrite.');
-  }
 
   for (const d of getInitDirs()) {
     fs.mkdirSync(path.join(dir, d), { recursive: true });
   }
 
   const fw = (framework ?? detectFramework(dir))?.toLowerCase();
+
+  if (fs.existsSync(claudeMdPath) && !force) {
+    const existing = fs.readFileSync(claudeMdPath, 'utf8');
+    const { content, added } = appendCtoSections(existing, date);
+    if (added.length === 0) {
+      return { created: false, merged: false, added: [] };
+    }
+    fs.writeFileSync(claudeMdPath, content, 'utf8');
+    writeFile(path.join(dir, '.claudeignore'), getClaudeIgnore(fw));
+    writeFile(path.join(dir, '.claude', 'COMMON_MISTAKES.md'), buildCommonMistakesMd(date));
+    writeFile(path.join(dir, '.claude', 'QUICK_START.md'), buildQuickStartMd(date));
+    writeFile(path.join(dir, '.claude', 'ARCHITECTURE_MAP.md'), buildArchitectureMapMd(date));
+    writeFile(path.join(dir, 'docs', 'INDEX.md'), buildDocsIndexMd(date));
+    return { created: false, merged: true, added };
+  }
+
   writeInitFiles(dir, fw, projectType, techStack, mainFeatures, date);
+  return { created: true, merged: false, added: [] };
 }
 
 export async function initCommand(options) {
@@ -321,17 +387,24 @@ export async function initCommand(options) {
   }
 
   console.log(chalk.green('📁 Creating directory structure...'));
-  try {
-    await runInit(process.cwd(), { framework, ...projectInfo, force });
-  } catch (err) {
-    if (err.message.includes('already exists')) {
-      console.log(chalk.yellow(`⚠️  ${err.message}`));
-      return;
-    }
-    throw err;
+  const { created, merged, added } = await runInit(process.cwd(), { framework, ...projectInfo, force });
+
+  if (!created && !merged) {
+    console.log(chalk.dim('ℹ️  CLAUDE.md already has all cto sections. No changes needed.'));
+    console.log(chalk.dim('   Run with --force to overwrite completely.'));
+    console.log('');
+    return;
   }
 
-  printSetupComplete();
+  if (merged) {
+    console.log('');
+    console.log(chalk.green('✅ CLAUDE.md updated!'));
+    console.log('');
+    console.log(`📝 Appended missing sections: ${added.map(s => chalk.cyan(s)).join(', ')}`);
+    console.log('');
+  } else {
+    printSetupComplete();
+  }
   await maybeInstallHooks(installHooks, yes);
   printNextSteps();
 }

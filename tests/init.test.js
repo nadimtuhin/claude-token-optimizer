@@ -16,6 +16,8 @@ import {
   getInitDirs,
   resolveFramework,
   resolveProjectInfo,
+  getMissingCtoSections,
+  appendCtoSections,
 } from '../src/commands/init.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -125,6 +127,41 @@ describe('unit — pure logic', () => {
       assert.equal(resolveProjectInfo(false, undefined), null);
     });
   });
+
+  describe('getMissingCtoSections', () => {
+    it('returns Session Start Protocol when missing', () => {
+      const missing = getMissingCtoSections('# My CLAUDE.md\n\nSome content.\n');
+      assert.deepStrictEqual(missing, ['Session Start Protocol']);
+    });
+    it('returns empty when Session Start Protocol present', () => {
+      const content = buildClaudeMd('App', 'Node', 'REST API', '2026-01-01');
+      assert.deepStrictEqual(getMissingCtoSections(content), []);
+    });
+  });
+
+  describe('appendCtoSections', () => {
+    it('appends Session Start Protocol to plain CLAUDE.md', () => {
+      const existing = '# My CLAUDE.md\n\nSome content.\n';
+      const { content, added } = appendCtoSections(existing, '2026-01-01');
+      assert.deepStrictEqual(added, ['Session Start Protocol']);
+      assert.ok(content.includes('My CLAUDE.md'));
+      assert.ok(content.includes('Session Start Protocol'));
+      assert.ok(content.includes('Optimized with'));
+    });
+    it('returns unchanged content when all sections present', () => {
+      const full = buildClaudeMd('App', 'Node', 'REST API', '2026-01-01');
+      const { content, added } = appendCtoSections(full, '2026-01-01');
+      assert.deepStrictEqual(added, []);
+      assert.strictEqual(content, full);
+    });
+    it('does not duplicate cto footer on re-append', () => {
+      const existing = '# My CLAUDE.md\n\nSome content.\n';
+      const { content: first } = appendCtoSections(existing, '2026-01-01');
+      const { content: second } = appendCtoSections(first, '2026-01-01');
+      const footerCount = (second.match(/Optimized with/g) || []).length;
+      assert.strictEqual(footerCount, 1);
+    });
+  });
 });
 
 // ── integration — filesystem ───────────────────────────────────────────────
@@ -201,12 +238,24 @@ describe('integration — filesystem', () => {
     assert.ok(content.includes('Express API'));
   });
 
-  it('throws if CLAUDE.md exists and --force not set', async () => {
-    fs.writeFileSync(path.join(tmpDir, 'CLAUDE.md'), 'existing content');
-    await assert.rejects(
-      () => runInit(tmpDir, defaultOptions),
-      /already exists/
-    );
+  it('appends missing cto sections when CLAUDE.md exists without --force', async () => {
+    fs.writeFileSync(path.join(tmpDir, 'CLAUDE.md'), '# My Existing CLAUDE.md\n\nSome content.\n');
+    const result = await runInit(tmpDir, defaultOptions);
+    assert.ok(result.merged, 'should report merged');
+    assert.deepStrictEqual(result.added, ['Session Start Protocol']);
+    const content = fs.readFileSync(path.join(tmpDir, 'CLAUDE.md'), 'utf8');
+    assert.ok(content.includes('My Existing CLAUDE.md'), 'preserves original content');
+    assert.ok(content.includes('Session Start Protocol'), 'appends missing section');
+  });
+
+  it('no changes when CLAUDE.md already has all cto sections', async () => {
+    await runInit(tmpDir, defaultOptions);
+    const before = fs.readFileSync(path.join(tmpDir, 'CLAUDE.md'), 'utf8');
+    const result = await runInit(tmpDir, defaultOptions);
+    assert.ok(!result.merged, 'should not report merged');
+    assert.deepStrictEqual(result.added, []);
+    const after = fs.readFileSync(path.join(tmpDir, 'CLAUDE.md'), 'utf8');
+    assert.strictEqual(before, after, 'content unchanged');
   });
 
   it('overwrites CLAUDE.md when --force is set', async () => {
