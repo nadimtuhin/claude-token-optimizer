@@ -3,7 +3,8 @@
   "version": "2.3.16",
   "description": "Cut Claude Code token usage by 90% — real token counts, optimized project setup",
   "bin": {
-    "cto": "bin/cto.js"
+    "cto": "bin/cto.js",
+    "claude-token-optimizer": "bin/cto.js"
   },
   "main": "src/cli.js",
   "type": "module",
