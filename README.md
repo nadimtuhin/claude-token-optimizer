@@ -182,6 +182,7 @@ Claude loads only what it needs. Everything else sits there at 0 token cost unti
 | `cto watch` | Live token dashboard — refreshes on file change, ASCII bar charts |
 | `cto hooks` | Install, list, and manage Claude Code hook templates |
 | `cto update` | Update cto to the latest npm version |
+| `cto update --content` | Refresh project files to latest templates (merge-safe — never overwrites your custom content) |
 
 ### Ongoing maintenance
 

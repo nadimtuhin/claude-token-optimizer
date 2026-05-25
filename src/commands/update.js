@@ -1,6 +1,10 @@
 import chalk from 'chalk';
+import fs from 'node:fs';
+import path from 'node:path';
 import { createRequire } from 'node:module';
 import { execSync, spawnSync } from 'node:child_process';
+import { appendCtoSections } from './init.js';
+import { hooksCommand } from './hooks.js';
 
 const { version: current } = createRequire(import.meta.url)('../../package.json');
 
@@ -22,7 +26,62 @@ function isGlobalInstall() {
   }
 }
 
-export async function updateCommand() {
+async function updateContent(dir) {
+  const date = new Date().toISOString().split('T')[0];
+  let anyChange = false;
+
+  // 1. CLAUDE.md — append missing sections only
+  const claudeMdPath = path.join(dir, 'CLAUDE.md');
+  if (fs.existsSync(claudeMdPath)) {
+    const existing = fs.readFileSync(claudeMdPath, 'utf8');
+    const { content, added } = appendCtoSections(existing, date);
+    if (added.length > 0) {
+      fs.writeFileSync(claudeMdPath, content, 'utf8');
+      console.log(chalk.green(`  ✓ CLAUDE.md — appended: ${added.join(', ')}`));
+      anyChange = true;
+    } else {
+      console.log(chalk.dim('  · CLAUDE.md — already up to date'));
+    }
+  } else {
+    console.log(chalk.yellow('  ⚠ CLAUDE.md not found — run cto init first'));
+  }
+
+  // 2. Hook templates — re-install any hooks that are already installed
+  const hooksDir = path.join(dir, '.claude', 'hooks');
+  if (fs.existsSync(hooksDir)) {
+    const installed = fs.readdirSync(hooksDir).filter(f => f.endsWith('.sh'));
+    if (installed.length > 0) {
+      for (const hook of installed) {
+        const name = hook.replace(/\.sh$/, '');
+        await hooksCommand('install', name, {});
+      }
+      console.log(chalk.green(`  ✓ hooks — refreshed ${installed.length} installed hook(s)`));
+      anyChange = true;
+    } else {
+      console.log(chalk.dim('  · hooks — none installed'));
+    }
+  } else {
+    console.log(chalk.dim('  · hooks — none installed'));
+  }
+
+  if (!anyChange) {
+    console.log('');
+    console.log(chalk.dim('  All project content is already current.'));
+  }
+  console.log('');
+}
+
+export async function updateCommand(opts) {
+  const dir = process.cwd();
+
+  if (opts.content) {
+    console.log('');
+    console.log(chalk.bold('Updating project content...'));
+    console.log('');
+    await updateContent(dir);
+    return;
+  }
+
   console.log('');
   console.log(chalk.bold('Checking for updates...'));
   console.log('');
@@ -40,6 +99,8 @@ export async function updateCommand() {
 
   if (current === latest) {
     console.log(chalk.green('✓ Already up to date.'));
+    console.log('');
+    console.log(chalk.dim(`  Run ${chalk.cyan('cto update --content')} to refresh project files (CLAUDE.md sections, hook scripts).`));
     console.log('');
     return;
   }
@@ -61,6 +122,8 @@ export async function updateCommand() {
     }
     console.log('');
     console.log(chalk.green(`✓ Updated to ${latest}`));
+    console.log('');
+    console.log(chalk.dim(`  Run ${chalk.cyan('cto update --content')} to refresh project files too.`));
   } else {
     console.log(chalk.yellow(`ℹ cto is not globally installed — cannot self-update.`));
     console.log('');

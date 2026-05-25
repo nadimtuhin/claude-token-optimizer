@@ -104,7 +104,8 @@ export function run() {
 
   program
     .command('update')
-    .description('Update cto to the latest version')
+    .description('Update cto to the latest version, or refresh project content templates')
+    .option('--content', 'refresh project files (CLAUDE.md sections, hook scripts) without touching custom content')
     .action(updateCommand);
 
   program.parse();
