@@ -309,7 +309,7 @@ describe('e2e — subprocess', () => {
       JSON.stringify({ dependencies: { next: '14.0.0' } }));
     execSync(`node "${CTO}" init --yes`, { cwd: tmpDir, encoding: 'utf8' });
     const content = fs.readFileSync(path.join(tmpDir, 'CLAUDE.md'), 'utf8');
-    assert.ok(content.includes('nextjs'), `expected CLAUDE.md to mention nextjs, got: ${content}`);
+    assert.ok(content.includes('**Tech Stack**: nextjs'), `expected CLAUDE.md Tech Stack to be nextjs, got: ${content}`);
   });
 
   it('shows no-framework message when no config files present', () => {
