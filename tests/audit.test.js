@@ -4,6 +4,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, '..');
+const CTO = path.join(ROOT, 'bin', 'cto.js');
 import {
   runAudit, applyFixes,
   checkClaudeMdContent, checkIgnoreContent,
@@ -758,8 +763,8 @@ describe('integration — filesystem', () => {
 // ─── E2E: subprocess ─────────────────────────────────────────────────────────
 
 describe('e2e — subprocess', () => {
-  const binPath = path.resolve('/Users/nadimtuhin/opensource/claude-token-optimizer/bin/cto.js');
-  const repoDir = path.resolve('/Users/nadimtuhin/opensource/claude-token-optimizer');
+  const binPath = CTO;
+  const repoDir = ROOT;
 
   it('exits 0 on a project that passes all checks', () => {
     // The repo itself has CLAUDE.md; run audit in a tmp dir with all files
