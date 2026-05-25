@@ -356,11 +356,12 @@ export async function runInit(dir, options) {
       return { created: false, merged: false, added: [] };
     }
     fs.writeFileSync(claudeMdPath, content, 'utf8');
-    writeFile(path.join(dir, '.claudeignore'), getClaudeIgnore(fw));
-    writeFile(path.join(dir, '.claude', 'COMMON_MISTAKES.md'), buildCommonMistakesMd(date));
-    writeFile(path.join(dir, '.claude', 'QUICK_START.md'), buildQuickStartMd(date));
-    writeFile(path.join(dir, '.claude', 'ARCHITECTURE_MAP.md'), buildArchitectureMapMd(date));
-    writeFile(path.join(dir, 'docs', 'INDEX.md'), buildDocsIndexMd(date));
+    const writeIfMissing = (p, c) => { if (!fs.existsSync(p)) writeFile(p, c); };
+    writeIfMissing(path.join(dir, '.claudeignore'), getClaudeIgnore(fw));
+    writeIfMissing(path.join(dir, '.claude', 'COMMON_MISTAKES.md'), buildCommonMistakesMd(date));
+    writeIfMissing(path.join(dir, '.claude', 'QUICK_START.md'), buildQuickStartMd(date));
+    writeIfMissing(path.join(dir, '.claude', 'ARCHITECTURE_MAP.md'), buildArchitectureMapMd(date));
+    writeIfMissing(path.join(dir, 'docs', 'INDEX.md'), buildDocsIndexMd(date));
     return { created: false, merged: true, added };
   }
 

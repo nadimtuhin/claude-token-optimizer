@@ -258,6 +258,16 @@ describe('integration — filesystem', () => {
     assert.strictEqual(before, after, 'content unchanged');
   });
 
+  it('merge path does not overwrite existing customized support files', async () => {
+    fs.writeFileSync(path.join(tmpDir, 'CLAUDE.md'), '# My CLAUDE.md\n\nSome content.\n');
+    fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true });
+    const customContent = '# My Custom Mistakes\n\n1. Never do this.\n';
+    fs.writeFileSync(path.join(tmpDir, '.claude', 'COMMON_MISTAKES.md'), customContent);
+    await runInit(tmpDir, defaultOptions);
+    const after = fs.readFileSync(path.join(tmpDir, '.claude', 'COMMON_MISTAKES.md'), 'utf8');
+    assert.strictEqual(after, customContent, 'COMMON_MISTAKES.md must not be overwritten on merge');
+  });
+
   it('overwrites CLAUDE.md when --force is set', async () => {
     fs.writeFileSync(path.join(tmpDir, 'CLAUDE.md'), 'existing content');
     await runInit(tmpDir, { ...defaultOptions, force: true });
