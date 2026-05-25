@@ -304,6 +304,14 @@ describe('e2e — subprocess', () => {
       `expected auto-detect message, got: ${out}`);
   });
 
+  it('auto-detected framework propagates into CLAUDE.md tech stack', () => {
+    fs.writeFileSync(path.join(tmpDir, 'package.json'),
+      JSON.stringify({ dependencies: { next: '14.0.0' } }));
+    execSync(`node "${CTO}" init --yes`, { cwd: tmpDir, encoding: 'utf8' });
+    const content = fs.readFileSync(path.join(tmpDir, 'CLAUDE.md'), 'utf8');
+    assert.ok(content.includes('nextjs'), `expected CLAUDE.md to mention nextjs, got: ${content}`);
+  });
+
   it('shows no-framework message when no config files present', () => {
     const out = execSync(`node "${CTO}" init --yes`, { cwd: tmpDir, encoding: 'utf8' });
     assert.ok(out.includes('No framework detected'),

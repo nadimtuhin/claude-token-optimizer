@@ -377,7 +377,7 @@ export async function initCommand(options) {
   framework = resolved.framework;
   printFrameworkInfo(resolved);
 
-  let projectInfo = resolveProjectInfo(yes, framework);
+  let projectInfo = resolveProjectInfo(yes, framework ?? resolved.detected);
   if (!projectInfo) {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     console.log(chalk.blue('📋 Project Information'));
