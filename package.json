@@ -43,7 +43,7 @@
   "dependencies": {
     "@anthropic-ai/tokenizer": "0.0.4",
     "chalk": "^5.3.0",
-    "commander": "^12.1.0",
+    "commander": "^15.0.0",
     "glob": "^13.0.6"
   }
 }
