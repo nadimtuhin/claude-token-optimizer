@@ -37,6 +37,15 @@ describe('unit — pure logic', () => {
     it('detects express', () => {
       assert.strictEqual(detectFromPackageJson(JSON.stringify({ dependencies: { express: '4.18.0' } })), 'express');
     });
+    it('detects react', () => {
+      assert.strictEqual(detectFromPackageJson(JSON.stringify({ dependencies: { react: '18.0.0', 'react-dom': '18.0.0' } })), 'react');
+    });
+    it('detects react from devDependencies', () => {
+      assert.strictEqual(detectFromPackageJson(JSON.stringify({ devDependencies: { react: '18.0.0' } })), 'react');
+    });
+    it('next takes priority over react', () => {
+      assert.strictEqual(detectFromPackageJson(JSON.stringify({ dependencies: { next: '14.0.0', react: '18.0.0' } })), 'nextjs');
+    });
     it('next takes priority over vue', () => {
       assert.strictEqual(detectFromPackageJson(JSON.stringify({ dependencies: { next: '14.0.0', vue: '3.0.0' } })), 'nextjs');
     });
@@ -111,6 +120,10 @@ describe('unit — pure logic', () => {
 
     it('express ignore contains *.min.js', () => {
       assert.ok(getClaudeIgnore('express').includes('*.min.js'));
+    });
+
+    it('react ignore contains build pattern', () => {
+      assert.ok(getClaudeIgnore('react').includes('build/**'));
     });
 
     it('django ignore contains migrations pattern', () => {
@@ -200,6 +213,16 @@ describe('integration — filesystem', () => {
   it('detectFramework: detects express from package.json', () => {
     write('package.json', JSON.stringify({ dependencies: { express: '4.18.0' } }));
     assert.strictEqual(detectFramework(tmpDir), 'express');
+  });
+
+  it('detectFramework: detects react from package.json', () => {
+    write('package.json', JSON.stringify({ dependencies: { react: '18.0.0', 'react-dom': '18.0.0' } }));
+    assert.strictEqual(detectFramework(tmpDir), 'react');
+  });
+
+  it('detectFramework: next takes priority over react', () => {
+    write('package.json', JSON.stringify({ dependencies: { next: '14.0.0', react: '18.0.0' } }));
+    assert.strictEqual(detectFramework(tmpDir), 'nextjs');
   });
 
   it('detectFramework: detects django from requirements.txt', () => {

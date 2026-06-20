@@ -4,7 +4,7 @@ import path from 'node:path';
 export const SUPPORTED_FRAMEWORKS = [
   'express', 'nextjs', 'vue', 'nuxtjs', 'angular',
   'django', 'rails', 'nestjs', 'laravel',
-  'fastapi', 'go', 'spring-boot', 'svelte',
+  'fastapi', 'go', 'spring-boot', 'svelte', 'react',
 ];
 
 const BASE_IGNORE = `# Task completion documents
@@ -135,6 +135,12 @@ node_modules/**
 build/**
 dist/**
 coverage/**`,
+
+  react: `# Node / React
+node_modules/**
+dist/**
+build/**
+coverage/**`,
 };
 
 export function getClaudeIgnore(framework) {
@@ -153,6 +159,7 @@ export function detectFromPackageJson(content) {
     if (deps['svelte']) return 'svelte';
     if (deps['vue']) return 'vue';
     if (deps['express']) return 'express';
+    if (deps['react']) return 'react';
   } catch { /* ignore malformed */ }
   return null;
 }
