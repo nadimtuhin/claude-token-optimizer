@@ -5,7 +5,7 @@ import readline from 'node:readline';
 import { getClaudeIgnore, isKnownFramework, detectFramework, SUPPORTED_FRAMEWORKS } from '../lib/frameworks.js';
 import { hooksCommand } from './hooks.js';
 import { getTarget, getDefaultTarget } from '../lib/targets.js';
-import { writeCursorInitFiles, getCursorInitDirs } from '../lib/cursor-builders.js';
+import { writeCursorInitFiles, getCursorInitDirs, buildCursorIgnore, buildCursorDocsIndexMd, buildCursorSessionProtocolSection } from '../lib/cursor-builders.js';
 
 function prompt(rl, question) {
   return new Promise(resolve => rl.question(question, resolve));
@@ -170,7 +170,7 @@ export function getMissingCtoSections(existingContent) {
   return missing;
 }
 
-export function appendCtoSections(existingContent, date) {
+export function appendCtoSections(existingContent, date, sectionBuilder = buildSessionProtocolSection) {
   const missing = getMissingCtoSections(existingContent);
   if (missing.length === 0) return { content: existingContent, added: [] };
 
@@ -182,7 +182,7 @@ export function appendCtoSections(existingContent, date) {
   ).trimEnd();
 
   const additions = missing.map(name => {
-    if (name === 'Session Start Protocol') return `\n\n---\n\n${buildSessionProtocolSection()}`;
+    if (name === 'Session Start Protocol') return `\n\n---\n\n${sectionBuilder()}`;
     return '';
   }).join('');
 
@@ -223,7 +223,7 @@ export function getInitDirs(target = getDefaultTarget()) {
 
 export function writeInitFiles(dir, fw, projectType, techStack, mainFeatures, date, target = getDefaultTarget()) {
   if (target.id === 'cursor') {
-    writeCursorInitFiles(dir, projectType, techStack, mainFeatures, date, buildDocsIndexMd);
+    writeCursorInitFiles(dir, projectType, techStack, mainFeatures, date);
     return;
   }
   writeFile(path.join(dir, '.claudeignore'), getClaudeIgnore(fw));
@@ -350,7 +350,8 @@ export async function runInit(dir, options) {
 
   if (fs.existsSync(instructionPath) && !force) {
     const existing = fs.readFileSync(instructionPath, 'utf8');
-    const { content, added } = appendCtoSections(existing, date);
+    const sectionBuilder = target.id === 'cursor' ? buildCursorSessionProtocolSection : buildSessionProtocolSection;
+    const { content, added } = appendCtoSections(existing, date, sectionBuilder);
     if (added.length === 0) {
       return { created: false, merged: false, added: [] };
     }
@@ -361,8 +362,11 @@ export async function runInit(dir, options) {
       writeIfMissing(path.join(dir, '.claude', 'COMMON_MISTAKES.md'), buildCommonMistakesMd(date));
       writeIfMissing(path.join(dir, '.claude', 'QUICK_START.md'), buildQuickStartMd(date));
       writeIfMissing(path.join(dir, '.claude', 'ARCHITECTURE_MAP.md'), buildArchitectureMapMd(date));
+      writeIfMissing(path.join(dir, 'docs', 'INDEX.md'), buildDocsIndexMd(date));
+    } else if (target.id === 'cursor') {
+      writeIfMissing(path.join(dir, '.cursorignore'), buildCursorIgnore());
+      writeIfMissing(path.join(dir, 'docs', 'INDEX.md'), buildCursorDocsIndexMd(date));
     }
-    writeIfMissing(path.join(dir, 'docs', 'INDEX.md'), buildDocsIndexMd(date));
     return { created: false, merged: true, added };
   }
 
@@ -418,7 +422,7 @@ export async function initCommand(options) {
 }
 
 async function runCursorInit(dir, options) {
-  const { yes, framework } = options;
+  const { yes, framework, force } = options;
   const resolved = resolveFramework(framework, dir);
   const fw = resolved.framework ?? resolved.detected;
 
@@ -433,7 +437,7 @@ async function runCursorInit(dir, options) {
   }
 
   console.log(chalk.green('📁 Creating Cursor directory structure...'));
-  const { created, merged } = await runInit(dir, { framework, ...projectInfo, target: 'cursor' });
+  const { created, merged } = await runInit(dir, { framework, force, ...projectInfo, target: 'cursor' });
 
   if (!created && !merged) {
     console.log(chalk.dim('ℹ️  AGENTS.md already has all cto sections. No changes needed.'));

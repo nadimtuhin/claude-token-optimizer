@@ -4,7 +4,6 @@ import path from 'node:path';
 import { scanAutoLoadFiles } from '../lib/scanner.js';
 import { countTokens } from '../lib/tokenizer.js';
 import { getTarget, getDefaultTarget } from '../lib/targets.js';
-import { classifyRule } from '../lib/mdc.js';
 import { buildClaudeMd, buildCommonMistakesMd, buildQuickStartMd, buildArchitectureMapMd, buildDocsIndexMd } from './init.js';
 import { buildAgentsMd } from '../lib/cursor-builders.js';
 
