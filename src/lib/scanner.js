@@ -1,15 +1,10 @@
 import { glob } from 'glob';
 import fs from 'node:fs';
 import path from 'node:path';
+import { getDefaultTarget } from './targets.js';
 
-const AUTO_LOAD_PATTERNS = [
-  '*.md',
-  '.claude/*.md',
-  'docs/**/*.md',
-];
-
-function readIgnorePatterns(dir) {
-  const ignorePath = path.join(dir, '.claudeignore');
+function readIgnorePatterns(dir, ignoreFile) {
+  const ignorePath = path.join(dir, ignoreFile);
   if (!fs.existsSync(ignorePath)) return [];
   return fs.readFileSync(ignorePath, 'utf8')
     .split('\n')
@@ -17,22 +12,25 @@ function readIgnorePatterns(dir) {
     .filter(l => l && !l.startsWith('#'));
 }
 
-export async function scanAutoLoadFiles(dir) {
-  const ignorePatterns = readIgnorePatterns(dir);
+export async function scanAutoLoadFiles(dir, target = getDefaultTarget()) {
+  const ignorePatterns = readIgnorePatterns(dir, target.ignoreFile);
 
-  const files = await glob(AUTO_LOAD_PATTERNS, {
+  const files = await glob(target.scanPatterns, {
     cwd: dir,
     absolute: true,
     ignore: ignorePatterns,
     dot: true,
   });
 
+  const seen = new Set();
   const results = [];
   for (const filePath of files) {
+    const resolved = path.resolve(filePath);
+    if (seen.has(resolved)) continue;
+    seen.add(resolved);
     try {
-      results.push({ path: filePath, content: fs.readFileSync(filePath, 'utf8') });
+      results.push({ path: resolved, content: fs.readFileSync(resolved, 'utf8') });
     } catch {
-      // skip unreadable files
     }
   }
   return results;
