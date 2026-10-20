@@ -10,6 +10,7 @@ import { watchCommand } from './commands/watch.js';
 import { diffCommand } from './commands/diff.js';
 import { updateCommand } from './commands/update.js';
 import { companionsCommand } from './commands/companions.js';
+import { getTarget } from './lib/targets.js';
 
 const { version } = createRequire(import.meta.url)('../package.json');
 
@@ -28,11 +29,13 @@ export function run() {
     .option('--yes', 'non-interactive with defaults')
     .option('--force', 'overwrite existing CLAUDE.md if present')
     .option('--hooks', 'install all Claude Code hooks non-interactively')
+    .option('--target <name>', 'target editor (claude-code, cursor)')
     .action(initCommand);
 
   program
     .command('measure')
     .description('Measure auto-loaded tokens; guides new projects to cto init, existing to cto compress')
+    .option('--target <name>', 'target editor (claude-code, cursor)')
     .action(measureCommand);
 
   program

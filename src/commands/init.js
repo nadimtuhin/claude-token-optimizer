@@ -4,6 +4,8 @@ import path from 'node:path';
 import readline from 'node:readline';
 import { getClaudeIgnore, isKnownFramework, detectFramework, SUPPORTED_FRAMEWORKS } from '../lib/frameworks.js';
 import { hooksCommand } from './hooks.js';
+import { getTarget, getDefaultTarget } from '../lib/targets.js';
+import { writeCursorInitFiles, getCursorInitDirs, buildCursorIgnore, buildCursorDocsIndexMd, buildCursorSessionProtocolSection } from '../lib/cursor-builders.js';
 
 function prompt(rl, question) {
   return new Promise(resolve => rl.question(question, resolve));
@@ -160,7 +162,6 @@ export function buildSessionProtocolSection() {
 - Files in \`docs/archive/\` (0 token cost)`;
 }
 
-// Returns section names missing from existingContent
 export function getMissingCtoSections(existingContent) {
   const missing = [];
   if (!existingContent.includes('## Session Start Protocol')) {
@@ -169,21 +170,19 @@ export function getMissingCtoSections(existingContent) {
   return missing;
 }
 
-// Appends missing cto sections to existingContent, returns new content
-export function appendCtoSections(existingContent, date) {
+export function appendCtoSections(existingContent, date, sectionBuilder = buildSessionProtocolSection) {
   const missing = getMissingCtoSections(existingContent);
   if (missing.length === 0) return { content: existingContent, added: [] };
 
   const ctoFooter = `\n\n---\n\n**Last Updated**: ${date}\n**Optimized with**: [Claude Token Optimizer](https://github.com/nadimtuhin/claude-token-optimizer)\n`;
 
-  // Strip existing cto footer to avoid duplication before re-appending
   const stripped = existingContent.replace(
     /\n*---\n+\*\*Last Updated\*\*:[^\n]*\n\*\*Optimized with\*\*:[^\n]*\n?$/,
     ''
   ).trimEnd();
 
   const additions = missing.map(name => {
-    if (name === 'Session Start Protocol') return `\n\n---\n\n${buildSessionProtocolSection()}`;
+    if (name === 'Session Start Protocol') return `\n\n---\n\n${sectionBuilder()}`;
     return '';
   }).join('');
 
@@ -204,16 +203,14 @@ export function buildDocsIndexMd(date) {
 
 ## Task-Specific Topics (Load As Needed)
 
-Add topic files in \`docs/learnings/\` and list them here.
-
 ---
 
 **Last Updated**: ${date}
 `;
 }
 
-// Pure: returns the list of dirs to create
-export function getInitDirs() {
+export function getInitDirs(target = getDefaultTarget()) {
+  if (target.id === 'cursor') return getCursorInitDirs();
   return [
     '.claude/completions',
     '.claude/sessions/active',
@@ -224,8 +221,11 @@ export function getInitDirs() {
   ];
 }
 
-// Writes all generated files into dir
-export function writeInitFiles(dir, fw, projectType, techStack, mainFeatures, date) {
+export function writeInitFiles(dir, fw, projectType, techStack, mainFeatures, date, target = getDefaultTarget()) {
+  if (target.id === 'cursor') {
+    writeCursorInitFiles(dir, projectType, techStack, mainFeatures, date);
+    return;
+  }
   writeFile(path.join(dir, '.claudeignore'), getClaudeIgnore(fw));
   writeFile(path.join(dir, 'CLAUDE.md'), buildClaudeMd(projectType, techStack, mainFeatures, date));
   writeFile(path.join(dir, '.claude', 'COMMON_MISTAKES.md'), buildCommonMistakesMd(date));
@@ -234,7 +234,6 @@ export function writeInitFiles(dir, fw, projectType, techStack, mainFeatures, da
   writeFile(path.join(dir, 'docs', 'INDEX.md'), buildDocsIndexMd(date));
 }
 
-// Returns { framework, detected, unknown } — pure-ish (calls detectFramework)
 export function resolveFramework(framework, dir) {
   if (framework && !isKnownFramework(framework)) {
     return { framework: undefined, detected: null, unknown: framework };
@@ -243,7 +242,6 @@ export function resolveFramework(framework, dir) {
   return { framework: framework ?? undefined, detected, unknown: null };
 }
 
-// Sync: returns default project info; null means "prompt needed"
 export function resolveProjectInfo(yes, framework) {
   if (yes || framework) {
     return {
@@ -255,7 +253,6 @@ export function resolveProjectInfo(yes, framework) {
   return null;
 }
 
-// Async: prompts user for project info via readline interface
 export async function promptProjectInfo(rl) {
   const projectType = await prompt(rl, 'Project Type (e.g., Express, Next.js, Django): ');
   const techStack = await prompt(rl, 'Tech Stack (e.g., Express, PostgreSQL, Prisma): ');
@@ -339,40 +336,54 @@ export async function maybeInstallHooks(installHooks, yes) {
 
 export async function runInit(dir, options) {
   const date = new Date().toISOString().split('T')[0];
-  const { projectType, techStack, mainFeatures, framework, force } = options;
+  const { projectType, techStack, mainFeatures, framework, force, target: targetId } = options;
 
-  const claudeMdPath = path.join(dir, 'CLAUDE.md');
+  const target = targetId ? getTarget(targetId) : getDefaultTarget();
+  const instructionFile = target.instructionFile;
+  const instructionPath = path.join(dir, instructionFile);
 
-  for (const d of getInitDirs()) {
+  for (const d of getInitDirs(target)) {
     fs.mkdirSync(path.join(dir, d), { recursive: true });
   }
 
   const fw = (framework ?? detectFramework(dir))?.toLowerCase();
 
-  if (fs.existsSync(claudeMdPath) && !force) {
-    const existing = fs.readFileSync(claudeMdPath, 'utf8');
-    const { content, added } = appendCtoSections(existing, date);
+  if (fs.existsSync(instructionPath) && !force) {
+    const existing = fs.readFileSync(instructionPath, 'utf8');
+    const sectionBuilder = target.id === 'cursor' ? buildCursorSessionProtocolSection : buildSessionProtocolSection;
+    const { content, added } = appendCtoSections(existing, date, sectionBuilder);
     if (added.length === 0) {
       return { created: false, merged: false, added: [] };
     }
-    fs.writeFileSync(claudeMdPath, content, 'utf8');
+    fs.writeFileSync(instructionPath, content, 'utf8');
     const writeIfMissing = (p, c) => { if (!fs.existsSync(p)) writeFile(p, c); };
-    writeIfMissing(path.join(dir, '.claudeignore'), getClaudeIgnore(fw));
-    writeIfMissing(path.join(dir, '.claude', 'COMMON_MISTAKES.md'), buildCommonMistakesMd(date));
-    writeIfMissing(path.join(dir, '.claude', 'QUICK_START.md'), buildQuickStartMd(date));
-    writeIfMissing(path.join(dir, '.claude', 'ARCHITECTURE_MAP.md'), buildArchitectureMapMd(date));
-    writeIfMissing(path.join(dir, 'docs', 'INDEX.md'), buildDocsIndexMd(date));
+    if (target.id === 'claude-code') {
+      writeIfMissing(path.join(dir, '.claudeignore'), getClaudeIgnore(fw));
+      writeIfMissing(path.join(dir, '.claude', 'COMMON_MISTAKES.md'), buildCommonMistakesMd(date));
+      writeIfMissing(path.join(dir, '.claude', 'QUICK_START.md'), buildQuickStartMd(date));
+      writeIfMissing(path.join(dir, '.claude', 'ARCHITECTURE_MAP.md'), buildArchitectureMapMd(date));
+      writeIfMissing(path.join(dir, 'docs', 'INDEX.md'), buildDocsIndexMd(date));
+    } else if (target.id === 'cursor') {
+      writeIfMissing(path.join(dir, '.cursorignore'), buildCursorIgnore());
+      writeIfMissing(path.join(dir, 'docs', 'INDEX.md'), buildCursorDocsIndexMd(date));
+    }
     return { created: false, merged: true, added };
   }
 
-  writeInitFiles(dir, fw, projectType, techStack, mainFeatures, date);
+  writeInitFiles(dir, fw, projectType, techStack, mainFeatures, date, target);
   return { created: true, merged: false, added: [] };
 }
 
 export async function initCommand(options) {
   printHeader();
 
-  let { framework, yes, force, hooks: installHooks } = options;
+  let { framework, yes, force, hooks: installHooks, target: targetId } = options;
+  const target = targetId ? getTarget(targetId) : getDefaultTarget();
+
+  if (target.id === 'cursor') {
+    return runCursorInit(process.cwd(), options);
+  }
+
   const resolved = resolveFramework(framework, process.cwd());
   framework = resolved.framework;
   printFrameworkInfo(resolved);
@@ -388,7 +399,7 @@ export async function initCommand(options) {
   }
 
   console.log(chalk.green('📁 Creating directory structure...'));
-  const { created, merged, added } = await runInit(process.cwd(), { framework, ...projectInfo, force });
+  const { created, merged, added } = await runInit(process.cwd(), { framework, ...projectInfo, force, target: targetId });
 
   if (!created && !merged) {
     console.log(chalk.dim('ℹ️  CLAUDE.md already has all cto sections. No changes needed.'));
@@ -408,4 +419,36 @@ export async function initCommand(options) {
   }
   await maybeInstallHooks(installHooks, yes);
   printNextSteps();
+}
+
+async function runCursorInit(dir, options) {
+  const { yes, framework, force } = options;
+  const resolved = resolveFramework(framework, dir);
+  const fw = resolved.framework ?? resolved.detected;
+
+  let projectInfo = resolveProjectInfo(yes, fw);
+  if (!projectInfo) {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    console.log(chalk.blue('📋 Project Information'));
+    console.log('');
+    projectInfo = await promptProjectInfo(rl);
+    rl.close();
+    console.log('');
+  }
+
+  console.log(chalk.green('📁 Creating Cursor directory structure...'));
+  const { created, merged } = await runInit(dir, { framework, force, ...projectInfo, target: 'cursor' });
+
+  if (!created && !merged) {
+    console.log(chalk.dim('ℹ️  AGENTS.md already has all cto sections. No changes needed.'));
+    console.log('');
+    return;
+  }
+
+  console.log('');
+  console.log(chalk.green('✅ Cursor setup complete!'));
+  console.log('');
+  console.log('   Add rules to .cursor/rules/*.mdc');
+  console.log(`   Run ${chalk.cyan('cto measure --target cursor')} to verify`);
+  console.log('');
 }
