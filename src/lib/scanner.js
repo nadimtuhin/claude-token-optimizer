@@ -12,6 +12,8 @@ function readIgnorePatterns(dir, ignoreFile) {
     .filter(l => l && !l.startsWith('#'));
 }
 
+const MAX_SCAN_BYTES = 1_000_000;
+
 export async function scanAutoLoadFiles(dir, target = getDefaultTarget()) {
   const ignorePatterns = readIgnorePatterns(dir, target.ignoreFile);
 
@@ -29,6 +31,8 @@ export async function scanAutoLoadFiles(dir, target = getDefaultTarget()) {
     if (seen.has(resolved)) continue;
     seen.add(resolved);
     try {
+      const stat = fs.statSync(resolved);
+      if (stat.size > MAX_SCAN_BYTES) continue;
       results.push({ path: resolved, content: fs.readFileSync(resolved, 'utf8') });
     } catch {
     }

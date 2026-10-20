@@ -5,13 +5,14 @@ import { scanAutoLoadFiles } from '../lib/scanner.js';
 import { countTokens } from '../lib/tokenizer.js';
 import { getTarget, getDefaultTarget } from '../lib/targets.js';
 import { buildClaudeMd, buildCommonMistakesMd, buildQuickStartMd, buildArchitectureMapMd, buildDocsIndexMd } from './init.js';
-import { buildAgentsMd } from '../lib/cursor-builders.js';
+import { buildAgentsMd, buildCursorDocsIndexMd } from '../lib/cursor-builders.js';
+import { classifyRule } from '../lib/mdc.js';
 
 export function buildAfterFiles(date, target = getDefaultTarget()) {
   if (target.id === 'cursor') {
     return [
       { label: 'AGENTS.md', content: buildAgentsMd('Application', 'Your stack', 'See README', date) },
-      { label: 'docs/INDEX.md', content: buildDocsIndexMd(date) },
+      { label: 'docs/INDEX.md', content: buildCursorDocsIndexMd(date) },
     ].map(f => ({ label: f.label, tokens: countTokens(f.content) }));
   }
   return [
@@ -72,7 +73,10 @@ export function formatMeasureReport(report, isInitialized, dirName, target = get
 
 export async function buildReport(dir, target = getDefaultTarget()) {
   const files = await scanAutoLoadFiles(dir, target);
-  const fileBreakdown = files.map(f => ({ label: path.relative(dir, f.path), tokens: countTokens(f.content) }));
+  const filtered = target.id === 'cursor'
+    ? files.filter(f => path.extname(f.path) !== '.mdc' || classifyRule(f.content).policy !== 'manual')
+    : files;
+  const fileBreakdown = filtered.map(f => ({ label: path.relative(dir, f.path), tokens: countTokens(f.content) }));
   const before = fileBreakdown.reduce((sum, f) => sum + f.tokens, 0);
   const afterFiles = buildAfterFiles(new Date().toISOString().split('T')[0], target);
   const after = afterFiles.reduce((sum, f) => sum + f.tokens, 0);
