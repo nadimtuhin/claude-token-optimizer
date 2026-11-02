@@ -57,6 +57,6 @@
     "@anthropic-ai/tokenizer": "0.0.4",
     "chalk": "^6.0.0",
     "commander": "^15.0.0",
-    "glob": "^13.0.6"
+    "glob": "^14.0.3"
   }
 }
