@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import { countTokens } from '../lib/tokenizer.js';
+import { markFencedLines } from '../lib/fences.js';
 
 function promptUser(rl, question) {
   return new Promise(resolve => rl.question(question, resolve));
@@ -10,12 +11,13 @@ function promptUser(rl, question) {
 
 export function parseSections(content) {
   const lines = content.split('\n');
+  const fenced = markFencedLines(lines);
   const sections = [];
   let current = null;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const m = line.match(/^(#{1,6})\s+(.+)$/);
+    const m = !fenced[i] && line.match(/^(#{1,6})\s+(.+)$/);
     if (m) {
       if (current) sections.push(current);
       current = { heading: m[2], level: m[1].length, raw: line, content: '', startLine: i + 1 };
@@ -118,12 +120,18 @@ export function findPruneTargets(content, options) {
 
 export function removeSection(content, sectionRaw) {
   const level = (sectionRaw.match(/^(#+)/) || ['', '#'])[1].length;
-  const escapedRaw = sectionRaw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const pattern = new RegExp(
-    `${escapedRaw}[\\s\\S]*?(?=\\n#{1,${level}}\\s|$)`,
-    '',
-  );
-  return content.replace(pattern, '').replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
+  const lines = content.split('\n');
+  const fenced = markFencedLines(lines);
+  const start = lines.findIndex((line, i) => !fenced[i] && line === sectionRaw);
+  if (start === -1) return content;
+  let end = start + 1;
+  while (end < lines.length) {
+    const m = !fenced[end] && lines[end].match(/^(#{1,6})\s/);
+    if (m && m[1].length <= level) break;
+    end++;
+  }
+  lines.splice(start, end - start);
+  return lines.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
 }
 
 // Pure: formats a single dry-run line for display
