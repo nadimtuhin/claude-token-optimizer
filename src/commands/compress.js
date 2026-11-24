@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import { countTokens } from '../lib/tokenizer.js';
+import { markFencedLines } from '../lib/fences.js';
 
 const LANG_SHORT = {
   javascript: 'js', typescript: 'ts', python: 'py', ruby: 'rb',
@@ -22,9 +23,12 @@ export function shortenCodeFences(content) {
 
 export function truncateLongLists(content, maxItems = 3) {
   const changes = [];
+  const fenced = markFencedLines(content.split('\n'));
   const result = content.replace(
     /((?:^[ \t]*[-*] .+\n){6,})/gm,
-    (block) => {
+    (block, _group, offset) => {
+      // A list block never spans a fence marker, so its first line decides.
+      if (fenced[content.slice(0, offset).split('\n').length - 1]) return block;
       const lines = block.split('\n').filter(Boolean);
       if (lines.length <= maxItems) return block;
       const kept = lines.slice(0, maxItems);

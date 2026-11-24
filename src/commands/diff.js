@@ -23,8 +23,8 @@ export function formatDiffReport(d, targetLabel, backupLabel) {
     chalk.bold(`📊 Token diff — ${targetLabel}`),
     '',
     chalk.dim(`  ${sep}`),
-    `  ${'Before (' + backupLabel + '):'.padEnd(36)} ${chalk.yellow(('~' + d.backupTokens).padStart(6))} tokens`,
-    `  ${'After  (' + targetLabel + '):'.padEnd(36)} ${chalk.cyan(('~' + d.currentTokens).padStart(6))} tokens`,
+    `  ${('Before (' + backupLabel + '):').padEnd(36)} ${chalk.yellow(('~' + d.backupTokens).padStart(6))} tokens`,
+    `  ${('After  (' + targetLabel + '):').padEnd(36)} ${chalk.cyan(('~' + d.currentTokens).padStart(6))} tokens`,
     chalk.dim(`  ${sep}`),
   ];
 

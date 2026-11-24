@@ -9,6 +9,15 @@ import { computeDiff, formatDiffReport } from '../src/commands/diff.js';
 const binPath = path.resolve(import.meta.dirname, '../bin/cto.js');
 
 describe('unit — pure logic', () => {
+  it('formatDiffReport: Before and After counts line up in one column', () => {
+    const lines = formatDiffReport(computeDiff('a', 'a b c'), 'CLAUDE.md', 'CLAUDE.md.bak')
+      .map(l => l.replace(/\x1b\[[0-9;]*m/g, ''));
+    const before = lines.find(l => l.includes('Before ('));
+    const after = lines.find(l => l.includes('After  ('));
+    assert.strictEqual(before.indexOf('tokens'), after.indexOf('tokens'));
+    assert.ok(before.indexOf('~') < 45, `label not padded as a whole: ${JSON.stringify(before)}`);
+  });
+
   it('computeDiff: reports token reduction when current is smaller', () => {
     const large = 'word '.repeat(200);
     const small = 'word '.repeat(100);

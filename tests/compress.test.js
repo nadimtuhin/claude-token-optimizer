@@ -87,6 +87,21 @@ describe('unit — pure logic', () => {
       const { result } = truncateLongLists(items, 3);
       assert.ok(result.includes('more'), `expected 'more' in: ${result}`);
     });
+
+    it('leaves list-like lines inside fenced code untouched', () => {
+      const items = Array.from({ length: 8 }, (_, i) => `  - run: step${i}`).join('\n');
+      const content = '```yaml\nsteps:\n' + items + '\n```\n';
+      const { result, changes } = truncateLongLists(content, 3);
+      assert.strictEqual(result, content);
+      assert.strictEqual(changes.length, 0);
+    });
+
+    it('still truncates a list that follows a closed code fence', () => {
+      const items = Array.from({ length: 8 }, (_, i) => `- Item ${i + 1}`).join('\n') + '\n';
+      const { result, changes } = truncateLongLists('```\ncode\n```\n' + items, 3);
+      assert.ok(!result.includes('Item 8'));
+      assert.strictEqual(changes.length, 1);
+    });
   });
 
   describe('stripMarkup', () => {

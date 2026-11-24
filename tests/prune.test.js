@@ -232,6 +232,34 @@ describe('unit — pure logic', () => {
       assert.ok(result.includes('## C'));
       assert.ok(!result.includes('## B'));
     });
+
+    it('does not match a heading that only contains the target heading text', () => {
+      const content = '# P\n\n### Done list\nkeep me\n\n## Done\nold\n\n## Keep\nx\n';
+      const result = removeSection(content, '## Done');
+      assert.ok(result.includes('### Done list\nkeep me'), `wrong section removed:\n${result}`);
+      assert.ok(!result.includes('old'));
+      assert.ok(result.includes('## Keep'));
+    });
+
+    it('removes a whole code block inside the section, not just up to a # comment', () => {
+      const content = '# P\n\n## Completed\n```bash\n# run migration\nnpm run migrate\n```\n\n## Keep\nx\n';
+      const result = removeSection(content, '## Completed');
+      assert.strictEqual(result, '# P\n\n## Keep\nx\n');
+    });
+  });
+
+  describe('code fences', () => {
+    it('parseSections ignores # lines inside fenced code', () => {
+      const content = '# P\n\n## Setup\n```bash\n# install\nnpm i\n```\n~~~\n## not a heading\n~~~\n';
+      const sections = parseSections(content);
+      assert.deepStrictEqual(sections.map(s => s.heading), ['P', 'Setup']);
+    });
+
+    it('findPruneTargets does not flag a fenced "## Completed" example', () => {
+      const content = '# P\n\n## Example\n```md\n## Completed\n- x\n```\n';
+      const targets = findPruneTargets(content);
+      assert.ok(!targets.some(t => t.type === 'completed'), JSON.stringify(targets));
+    });
   });
 
   describe('formatDryRunLine', () => {
